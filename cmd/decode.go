@@ -10,7 +10,7 @@ import (
 var decodeCmd = &cobra.Command{
 	Use:   "decode",
 	Short: "A brief description of your command",
-	Args: cobra.MaximumNArgs(1),
+	Args:  cobra.MaximumNArgs(1),
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		cobra.CheckErr(projectCfgError)
 	},

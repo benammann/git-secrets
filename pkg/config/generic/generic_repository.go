@@ -24,7 +24,6 @@ type Repository struct {
 
 	// secrets holds all secrets of all contexts
 	secrets []*Secret
-
 }
 
 // GetConfigVersion returns the config version this repository is built from

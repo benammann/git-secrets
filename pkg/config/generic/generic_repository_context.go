@@ -8,9 +8,9 @@ import (
 )
 
 type Context struct {
-	Name string
-	SecretResolver encryption.SecretResolver
-	Encryption encryption.Engine
+	Name             string
+	SecretResolver   encryption.SecretResolver
+	Encryption       encryption.Engine
 	EncryptedSecrets map[string]string
 }
 

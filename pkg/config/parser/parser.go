@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 )
+
 type VersionFixType struct {
 	Version int `yaml:"version"`
 }
@@ -36,4 +37,3 @@ func ParseRepository(pathToFile string) (*config_generic.Repository, error) {
 	}
 
 }
-

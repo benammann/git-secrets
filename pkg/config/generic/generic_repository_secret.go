@@ -15,7 +15,6 @@ type Secret struct {
 
 	// OriginContext references the configured context to decode the secret
 	OriginContext *Context
-
 }
 
 // AddSecret adds a secret to the repository
@@ -50,7 +49,6 @@ func (c *Repository) AddSecret(secret *Secret) error {
 
 	return nil
 }
-
 
 // GetSecretsByContext returns all the secrets related to the current context
 func (c *Repository) GetSecretsByContext(contextName string) (res []*Secret) {

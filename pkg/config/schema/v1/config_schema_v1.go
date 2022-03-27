@@ -38,7 +38,7 @@ type ContextAwareFilesToRender struct {
 
 type Features struct {
 	RenderFiles map[string]ContextAwareFilesToRender `yaml:"renderFiles"`
-	Export map[string]map[string]string              `yaml:"export"`
+	Export      map[string]map[string]string         `yaml:"export"`
 }
 
 func IsV1(version int) bool {
@@ -119,7 +119,7 @@ func ParseSchemaV1(input []byte) (*config_generic.Repository, error) {
 	// first, initialize all contexts
 	for contextKey, contextValue := range Parsed.Context {
 		localContext := &config_generic.Context{
-			Name: contextKey,
+			Name:             contextKey,
 			EncryptedSecrets: contextValue.Secrets,
 		}
 		// reference the default context
@@ -136,18 +136,18 @@ func ParseSchemaV1(input []byte) (*config_generic.Repository, error) {
 
 	// for contextKey, contextValue := range Parsed.Features.RenderFiles {
 
-		//var files []*base.RenderFilesFile
-		//for _, file := range contextValue.Files {
-		//	files = append(files, &base.RenderFilesFile{
-		//		FileIn: file.FileIn,
-		//		FileOut: file.FileOut,
-		//	})
-		//}
-		//
-		//renderFileContexts = append(renderFileContexts, &base.RenderFilesContext{
-		//	ContextName: contextKey,
-		//	Files: files,
-		//})
+	//var files []*base.RenderFilesFile
+	//for _, file := range contextValue.Files {
+	//	files = append(files, &base.RenderFilesFile{
+	//		FileIn: file.FileIn,
+	//		FileOut: file.FileOut,
+	//	})
+	//}
+	//
+	//renderFileContexts = append(renderFileContexts, &base.RenderFilesContext{
+	//	ContextName: contextKey,
+	//	Files: files,
+	//})
 	// }
 
 	sort.SliceStable(contexts, func(i, j int) bool {
@@ -159,9 +159,9 @@ func ParseSchemaV1(input []byte) (*config_generic.Repository, error) {
 	for _, context := range contexts {
 		for secretKey, encryptedSecret := range context.EncryptedSecrets {
 			secrets = append(secrets, &config_generic.Secret{
-				Name: secretKey,
+				Name:          secretKey,
 				OriginContext: context,
-				EncodedValue: encryptedSecret,
+				EncodedValue:  encryptedSecret,
 			})
 		}
 	}

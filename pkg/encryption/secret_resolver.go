@@ -22,7 +22,7 @@ func NewPlainSecretResolver(plainSecret string) SecretResolver {
 	}
 }
 
-func(rs *FromPlainSecretResolver) GetPlainSecret() (secret []byte, errResolve error) {
+func (rs *FromPlainSecretResolver) GetPlainSecret() (secret []byte, errResolve error) {
 	if rs.PlainSecret == "" {
 		return nil, fmt.Errorf("got empty secret")
 	}
@@ -40,7 +40,7 @@ func NewEnvSecretResolver(envName string) SecretResolver {
 	}
 }
 
-func(rs *FromEnvSecretResolver) GetPlainSecret() (secret []byte, errResolve error) {
+func (rs *FromEnvSecretResolver) GetPlainSecret() (secret []byte, errResolve error) {
 	envValue := os.Getenv(rs.envName)
 	if envValue == "" {
 		return nil, fmt.Errorf("env variable %s is empty", rs.envName)
@@ -59,7 +59,7 @@ func NewNameSecretResolver(secretName string) SecretResolver {
 	}
 }
 
-func(rs *FromNameSecretResolver) GetPlainSecret() (secret []byte, errResolve error) {
+func (rs *FromNameSecretResolver) GetPlainSecret() (secret []byte, errResolve error) {
 	configKey := cli_config.NamedSecret(rs.secretName)
 	configValue := viper.GetString(configKey)
 	if configValue == "" {
