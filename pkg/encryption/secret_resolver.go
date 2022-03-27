@@ -2,7 +2,7 @@ package encryption
 
 import (
 	"fmt"
-	"github.com/benammann/git-secrets/pkg/cli_config"
+	"github.com/benammann/git-secrets/pkg/config/cli"
 	"github.com/spf13/viper"
 	"os"
 )

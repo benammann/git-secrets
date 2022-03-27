@@ -41,7 +41,7 @@ var decodeCmd = &cobra.Command{
 			fmt.Println(decoded)
 		} else {
 			secretName := args[0]
-			selectedSecret := selectedContext.GetSecret(secretName)
+			selectedSecret := projectCfg.GetCurrentSecret(secretName)
 			if selectedSecret == nil {
 				cobra.CheckErr(fmt.Errorf("the secret %s does not exist", secretName))
 				return

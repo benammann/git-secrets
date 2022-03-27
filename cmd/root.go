@@ -16,9 +16,9 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-	"github.com/benammann/git-secrets/pkg/config"
-	"github.com/benammann/git-secrets/pkg/config_schema/base"
+	config_const "github.com/benammann/git-secrets/pkg/config/const"
+	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
+	config_parser "github.com/benammann/git-secrets/pkg/config/parser"
 	"github.com/spf13/cobra"
 	"os"
 
@@ -27,13 +27,13 @@ import (
 
 var globalCfgFile string
 var projectCfgFile string
-var projectCfg *base.Config
+var projectCfg *config_generic.Repository
 var projectCfgError error
 
-var selectedContext *base.Context
+var selectedContext *config_generic.Context
 var contextName string
 
-var overwrites base.ConfigCliArgs
+var overwrites config_generic.ConfigCliArgs
 
 var overwriteSecret string
 var overwriteSecretName string
@@ -106,7 +106,7 @@ func initGlobalConfig() {
 }
 
 func initProjectConfig() {
-	projectCfg, projectCfgError = config.ParseConfig(projectCfgFile)
+	projectCfg, projectCfgError = config_parser.ParseRepository(projectCfgFile)
 	if projectCfgError == nil {
 		projectCfg.MergeWithCliArgs(overwrites)
 	}
@@ -116,12 +116,11 @@ func resolveContext() {
 	if projectCfgError != nil {
 		return
 	}
-	if contextName == "" {
-		selectedContext = projectCfg.GetContext("default")
-		return
+	desiredContextName := config_const.DefaultContextName
+	if contextName != "" {
+		desiredContextName = contextName
 	}
-	selectedContext = projectCfg.GetContext(contextName)
-	if selectedContext == nil {
-		cobra.CheckErr(fmt.Errorf("the context %s is not configured", contextName))
-	}
+	desiredContext, errGetContext := projectCfg.SetSelectedContext(desiredContextName)
+	cobra.CheckErr(errGetContext)
+	selectedContext = desiredContext
 }
