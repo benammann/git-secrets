@@ -10,7 +10,8 @@ import (
 var encodeCmd = &cobra.Command{
 	Use:   "encode",
 	Args:  cobra.MinimumNArgs(1),
-	Short: "encodes the given value",
+	Short: "Encodes a value",
+	Long:  "Encodes a value",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		cobra.CheckErr(projectCfgError)
 	},

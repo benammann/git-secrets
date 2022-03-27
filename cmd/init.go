@@ -2,22 +2,34 @@ package cmd
 
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Initializes a .git-secrets.yaml file",
+	Example: `
+init
+init path/to/my/file.yaml
+`,
+	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("init called")
+
+		if projectCfg != nil {
+			cobra.CheckErr(fmt.Errorf("can not initialize while having config file %s loaded", projectCfgFile))
+		}
+		outputFile := ".git-secrets.yaml"
+		if len(args) == 1 {
+			outputFile = args[0]
+		}
+
+		if !strings.HasSuffix(outputFile, ".yaml") {
+			cobra.CheckErr(fmt.Errorf("output file %s must have .yaml file ending", outputFile))
+		}
+
+		fmt.Println("Writing", outputFile, "...")
 	},
 }
 

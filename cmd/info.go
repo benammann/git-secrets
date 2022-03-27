@@ -15,6 +15,9 @@ const InfoCmdFlagDecode = "decode"
 var infoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Displays the current configured secrets",
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		cobra.CheckErr(projectCfgError)
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 
 		allContexts := projectCfg.GetContexts()

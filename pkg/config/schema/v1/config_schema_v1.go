@@ -134,25 +134,22 @@ func ParseSchemaV1(input []byte) (*config_generic.Repository, error) {
 		context.Encryption = encryption.NewAesEngine(context.SecretResolver)
 	}
 
-	// for contextKey, contextValue := range Parsed.Features.RenderFiles {
-
-	//var files []*base.RenderFilesFile
-	//for _, file := range contextValue.Files {
-	//	files = append(files, &base.RenderFilesFile{
-	//		FileIn: file.FileIn,
-	//		FileOut: file.FileOut,
-	//	})
-	//}
-	//
-	//renderFileContexts = append(renderFileContexts, &base.RenderFilesContext{
-	//	ContextName: contextKey,
-	//	Files: files,
-	//})
-	// }
-
 	sort.SliceStable(contexts, func(i, j int) bool {
 		return contexts[i].Name == "default"
 	})
+
+	if Parsed.Features.RenderFiles != nil {
+		for _, context := range contexts {
+			if Parsed.Features.RenderFiles[context.Name].Files != nil {
+				for _, fileToRender := range Parsed.Features.RenderFiles[context.Name].Files {
+					errAddFile := context.AddFileToRender(fileToRender.FileIn, fileToRender.FileOut)
+					if errAddFile != nil {
+						return nil, fmt.Errorf("could not add file (%s -> %s) to context %s: %s", fileToRender.FileIn, fileToRender.FileOut, context.Name, errAddFile.Error())
+					}
+				}
+			}
+		}
+	}
 
 	var secrets []*config_generic.Secret
 

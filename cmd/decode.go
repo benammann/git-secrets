@@ -9,8 +9,14 @@ import (
 // decodeCmd represents the decode command
 var decodeCmd = &cobra.Command{
 	Use:   "decode",
-	Short: "A brief description of your command",
-	Args:  cobra.MaximumNArgs(1),
+	Short: "Decodes the given secret or value",
+	Long:  "Using this command you can either decode a secret which is configured in your .git-secrets file or you can decode a custom value using the --value parameter.",
+	Example: `decode mySecretName
+decode mySecretName -c production
+decode --value <encoded-base64-string>
+decode --value <encoded-base64-string> -c production
+`,
+	Args: cobra.MaximumNArgs(1),
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		cobra.CheckErr(projectCfgError)
 	},

@@ -16,13 +16,16 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		cobra.CheckErr(projectCfgError)
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("export called")
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(exportCmd)
+	// rootCmd.AddCommand(exportCmd)
 
 	// Here you will define your flags and configuration settings.
 
