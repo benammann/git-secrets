@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
 	"github.com/spf13/cobra"
@@ -15,6 +17,16 @@ type RenderFileData struct {
 	UsedContext string
 	UsedFile    *config_generic.FileToRender
 	Secrets     map[string]string
+}
+
+func Base64Encode(args ...interface{}) string {
+	return base64.StdEncoding.EncodeToString([]byte(args[0].(string)))
+}
+
+func getFuncMap() template.FuncMap {
+	return template.FuncMap{
+		"Base64Encode": Base64Encode,
+	}
 }
 
 // renderCmd represents the render command
@@ -47,10 +59,16 @@ var renderCmd = &cobra.Command{
 			}
 
 			if isDryRun {
+				fmt.Println("")
 				fmt.Println("Would render file", fileToRender.FileIn, "to", fileToRender.FileOut)
+				renderContextJson, _ := json.MarshalIndent(renderContext, "", "  ")
+				fmt.Println("Available Variables:")
+				fmt.Println(string(renderContextJson))
+				fmt.Println("")
 			}
 
 			tpl := template.New(fileToRender.FileIn)
+			tpl.Funcs(getFuncMap())
 			tpl, errTpl := tpl.ParseFiles(fileToRender.FileIn)
 			if errTpl != nil {
 				cobra.CheckErr(fmt.Errorf("could not read file contents of %s: %s", fileToRender.FileIn, errTpl.Error()))
@@ -74,7 +92,6 @@ var renderCmd = &cobra.Command{
 			}
 
 			if isDryRun {
-				fmt.Println()
 				fmt.Println()
 			} else {
 				fmt.Println("File Written:", fileToRender.FileOut)

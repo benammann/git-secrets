@@ -5,8 +5,8 @@
 
 apiVersion: v1
 data:
-  password: {{ .Secrets.databasePassword }}
+  password: {{ Base64Encode .Secrets.databasePassword  }}
 kind: Secret
 metadata:
-  name: database
+  name: database-{{ .UsedContext }}
 type: Opaque
