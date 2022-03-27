@@ -162,8 +162,6 @@ func ParseSchemaV1(input []byte) (*config_generic.Repository, error) {
 				Name: secretKey,
 				OriginContext: context,
 				EncodedValue: encryptedSecret,
-				// todo: allow to configure export env name
-				ExportAs: "",
 			})
 		}
 	}

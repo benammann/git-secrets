@@ -1,51 +1,78 @@
-/*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
 	"fmt"
+	"github.com/olekukonko/tablewriter"
+	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
 
+const InfoCmdFlagDecode = "decode"
+
 // infoCmd represents the info command
 var infoCmd = &cobra.Command{
 	Use:   "info",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Displays the current configured secrets",
 	Run: func(cmd *cobra.Command, args []string) {
-		for _, secret := range projectCfg.GetCurrentSecrets() {
-			decodedValue, errDecode := secret.Decode()
-			if errDecode != nil {
-				fmt.Printf("Could not decode %s: %s\n", secret.Name, errDecode.Error())
-				continue
-			}
-			fmt.Printf("%s: %s (from: %s)\n", secret.Name, decodedValue, secret.OriginContext.Name)
+
+		allContexts := projectCfg.GetContexts()
+		var allContextNames []string
+		for _, context := range allContexts {
+			allContextNames = append(allContextNames, context.Name)
 		}
+
+		fmt.Printf("Config File: %s\n", projectCfgFile)
+		fmt.Printf("Config Version: %d\n", projectCfg.GetConfigVersion())
+		fmt.Printf("Available Contexts: %s\n", strings.Join(allContextNames, ", "))
+		fmt.Printf("\n")
+
+		shouldDecode, _ := cmd.Flags().GetBool(InfoCmdFlagDecode)
+
+		tableHeader := []string{"Secret Name", "Origin Context"}
+		if shouldDecode {
+			tableHeader = append(tableHeader, "Decoded Value")
+		}
+
+		var tableData [][]string
+
+		for _, secret := range projectCfg.GetCurrentSecrets() {
+
+			tableRow := []string{secret.Name, secret.OriginContext.Name}
+			if shouldDecode {
+				decodedValue, errDecode := secret.Decode()
+				if errDecode != nil {
+					fmt.Printf("Could not decode %s: %s\n", secret.Name, errDecode.Error())
+					continue
+				}
+				tableRow = append(tableRow, decodedValue)
+			}
+
+			tableData = append(tableData, tableRow)
+
+		}
+
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader(tableHeader)
+		table.SetBorder(false)
+		table.AppendBulk(tableData)
+		table.SetAlignment(tablewriter.ALIGN_LEFT)
+		table.Render()
+		fmt.Println()
+
+		if shouldDecode == false {
+			fmt.Println("Use --decode or -d to show the decoded secrets")
+		}
+
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(infoCmd)
 
+	rootCmd.Flags().BoolP(InfoCmdFlagDecode, "d", false, "Adds the decoded secrets to the info table")
+	infoCmd.Flags().BoolP(InfoCmdFlagDecode, "d", false, "Adds the decoded secrets to the info table")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

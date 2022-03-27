@@ -16,9 +16,6 @@ type Secret struct {
 	// OriginContext references the configured context to decode the secret
 	OriginContext *Context
 
-	// ExportAs defines how the secret should be exported as environment variable, for example MY_SECRET
-	ExportAs string
-
 }
 
 // AddSecret adds a secret to the repository
