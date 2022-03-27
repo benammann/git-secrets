@@ -5,6 +5,7 @@ import (
 	"github.com/benammann/git-secrets/pkg/config_schema/base"
 	"github.com/benammann/git-secrets/pkg/encryption"
 	"gopkg.in/yaml.v2"
+	"sort"
 )
 
 type Schema struct {
@@ -36,6 +37,7 @@ type ContextAwareFilesToRender struct {
 
 type Features struct {
 	RenderFiles map[string]ContextAwareFilesToRender `yaml:"renderFiles"`
+	Export map[string]map[string]string `yaml:"export"`
 }
 
 func IsV1(version int) bool {
@@ -123,6 +125,7 @@ func ParseSchemaV1(input []byte) (*base.Config, error) {
 
 	for _, context := range contexts {
 		context.SecretResolver = getSecretResolver(Parsed.Context[context.Name].DecryptSecret, defaultContext)
+		context.Encryption = encryption.NewAesEngine(context.SecretResolver)
 	}
 
 	for contextKey, contextValue := range Parsed.Features.RenderFiles {
@@ -140,6 +143,35 @@ func ParseSchemaV1(input []byte) (*base.Config, error) {
 			Files: files,
 		})
 	}
+
+	sort.SliceStable(contexts, func(i, j int) bool {
+		return contexts[i].Name == "default"
+	})
+
+	for _, context := range contexts {
+		for secretKey, encryptedSecret := range context.EncryptedSecrets {
+			context.Secrets = append(context.Secrets, &base.Secret{
+				Name: secretKey,
+				OriginContext: context,
+				EncodedValue: encryptedSecret,
+			})
+		}
+	}
+
+	// add the default context variables to the given context
+	for _, context := range contexts {
+
+		if context.Name == "default" {
+			continue
+		}
+
+		for _, defaultSecret := range defaultContext.Secrets {
+			if context.GetSecret(defaultSecret.Name) == nil {
+				context.Secrets = append(context.Secrets, defaultSecret)
+			}
+		}
+
+ 	}
 
 	out := &base.Config{
 		Contexts: contexts,

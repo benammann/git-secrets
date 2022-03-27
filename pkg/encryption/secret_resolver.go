@@ -11,12 +11,30 @@ type SecretResolver interface {
 	GetPlainSecret() (secret []byte, errResolve error)
 }
 
+type FromPlainSecretResolver struct {
+	SecretResolver
+	PlainSecret string
+}
+
+func NewPlainSecretResolver(plainSecret string) SecretResolver {
+	return &FromPlainSecretResolver{
+		PlainSecret: plainSecret,
+	}
+}
+
+func(rs *FromPlainSecretResolver) GetPlainSecret() (secret []byte, errResolve error) {
+	if rs.PlainSecret == "" {
+		return nil, fmt.Errorf("got empty secret")
+	}
+	return []byte(rs.PlainSecret), nil
+}
+
 type FromEnvSecretResolver struct {
 	SecretResolver
 	envName string
 }
 
-func NewEnvSecretResolver(envName string) *FromEnvSecretResolver {
+func NewEnvSecretResolver(envName string) SecretResolver {
 	return &FromEnvSecretResolver{
 		envName: envName,
 	}
@@ -35,7 +53,7 @@ type FromNameSecretResolver struct {
 	secretName string
 }
 
-func NewNameSecretResolver(secretName string) *FromNameSecretResolver {
+func NewNameSecretResolver(secretName string) SecretResolver {
 	return &FromNameSecretResolver{
 		secretName: secretName,
 	}

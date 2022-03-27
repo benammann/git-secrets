@@ -16,18 +16,28 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/base64"
 	"fmt"
 	"github.com/benammann/git-secrets/pkg/config"
-	"github.com/benammann/git-secrets/pkg/encryption"
+	"github.com/benammann/git-secrets/pkg/config_schema/base"
 	"github.com/spf13/cobra"
-	"log"
 	"os"
 
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
+var globalCfgFile string
+var projectCfgFile string
+var projectCfg *base.Config
+var projectCfgError error
+
+var selectedContext *base.Context
+var contextName string
+
+var overwrites base.ConfigCliArgs
+
+var overwriteSecret string
+var overwriteSecretName string
+var overwriteSecretEnv string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -40,27 +50,7 @@ examples and usage of using your application. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fileName := args[0]
-		configOut, errConfig := config.ParseConfig(fileName)
-		cobra.CheckErr(errConfig)
-		defaultContext := configOut.GetDefaultContext()
-		encryptionEngine := encryption.NewAesEngine(defaultContext.SecretResolver)
-
-		encrypted, errEncrypt := encryptionEngine.EncodeValue("Hallo Welt")
-		if errEncrypt != nil {
-			log.Fatalf("could not encrypt: %s", errEncrypt.Error())
-		}
-
-		decrypted, errDecrypt := encryptionEngine.DecodeValue(encrypted)
-		if errDecrypt != nil {
-			log.Fatalf("could not decrypt: %s", errDecrypt.Error())
-		}
-
-		encryptedBase64 := base64.StdEncoding.EncodeToString([]byte(encrypted))
-
-		fmt.Println("Encrypted:", encryptedBase64)
-		fmt.Println("Decrypted:", decrypted)
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 
 	},
 	// Uncomment the following line if your bare application
@@ -75,24 +65,27 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(initGlobalConfig, initProjectConfig, resolveContext)
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.git-secrets.yaml)")
-
+	rootCmd.PersistentFlags().StringVar(&globalCfgFile, "global-config", "", "global config file (default is $HOME/.git-secrets.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&projectCfgFile, "project-config", "f",".git-secrets.yaml", "project config file (default is .git-secrets.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&contextName, "context-name", "c", "", "context name (default is 'default')")
+	rootCmd.PersistentFlags().StringVar(&overwrites.OverwriteSecret, "secret", "", "use this secret instead of the secret in the config file")
+	rootCmd.PersistentFlags().StringVar(&overwrites.OverwriteSecretName, "secret-name", "", "use this secret name instead of the secret name in the config file")
+	rootCmd.PersistentFlags().StringVar(&overwrites.OverwriteSecretEnv, "secret-from-env", "", "use this environment variable instead of the environment var in the config file")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile != "" {
+// initGlobalConfig reads in config file and ENV variables if set.
+func initGlobalConfig() {
+	if globalCfgFile != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
+		viper.SetConfigFile(globalCfgFile)
 	} else {
 		// Find home directory.
 		home, err := os.UserHomeDir()
@@ -108,6 +101,27 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+
+	}
+}
+
+func initProjectConfig() {
+	projectCfg, projectCfgError = config.ParseConfig(projectCfgFile)
+	if projectCfgError == nil {
+		projectCfg.MergeWithCliArgs(overwrites)
+	}
+}
+
+func resolveContext() {
+	if projectCfgError != nil {
+		return
+	}
+	if contextName == "" {
+		selectedContext = projectCfg.GetContext("default")
+		return
+	}
+	selectedContext = projectCfg.GetContext(contextName)
+	if selectedContext == nil {
+		cobra.CheckErr(fmt.Errorf("the context %s is not configured", contextName))
 	}
 }
