@@ -3,6 +3,7 @@ package config_generic
 import (
 	"fmt"
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
+	"sort"
 )
 
 type Secret struct {
@@ -46,6 +47,11 @@ func (c *Repository) AddSecret(secret *Secret) error {
 
 	// append the secret to the repository
 	c.secrets = append(c.secrets, secret)
+
+	// sort the secrets alphabetically
+	sort.SliceStable(c.secrets, func(i, j int) bool {
+		return c.secrets[i].Name < c.secrets[j].Name
+	})
 
 	return nil
 }

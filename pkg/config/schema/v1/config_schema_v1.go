@@ -129,14 +129,15 @@ func ParseSchemaV1(input []byte) (*config_generic.Repository, error) {
 		contexts = append(contexts, localContext)
 	}
 
+	// important, always default first since some logics depend on a fully defined default context
+	sort.SliceStable(contexts, func(i, j int) bool {
+		return contexts[i].Name == config_const.DefaultContextName
+	})
+
 	for _, context := range contexts {
 		context.SecretResolver = getSecretResolver(Parsed.Context[context.Name].DecryptSecret, defaultContext)
 		context.Encryption = encryption.NewAesEngine(context.SecretResolver)
 	}
-
-	sort.SliceStable(contexts, func(i, j int) bool {
-		return contexts[i].Name == "default"
-	})
 
 	if Parsed.Features.RenderFiles != nil {
 		for _, context := range contexts {

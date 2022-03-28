@@ -26,8 +26,7 @@ var infoCmd = &cobra.Command{
 			allContextNames = append(allContextNames, context.Name)
 		}
 
-		fmt.Printf("Config File: %s\n", projectCfgFile)
-		fmt.Printf("Config Version: %d\n", projectCfg.GetConfigVersion())
+		fmt.Printf("Config File: %s (Version: %d)\n", projectCfgFile, projectCfg.GetConfigVersion())
 		fmt.Printf("Available Contexts: %s\n", strings.Join(allContextNames, ", "))
 		fmt.Printf("\n")
 

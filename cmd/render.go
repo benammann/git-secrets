@@ -8,9 +8,12 @@ import (
 	"github.com/spf13/cobra"
 	"html/template"
 	"os"
+	"path"
 )
 
 const FlagDryRun = "dry-run"
+const FlagFileIn = "file-in"
+const FlagFileOut = "file-out"
 
 type RenderFileData struct {
 	UsedConfig  string
@@ -33,6 +36,12 @@ func getFuncMap() template.FuncMap {
 var renderCmd = &cobra.Command{
 	Use:   "render",
 	Short: "render files feature",
+	Args: func(cmd *cobra.Command, args []string) error {
+		if !(len(args) == 0 || len(args) == 2) {
+			return fmt.Errorf("usage: git-secrets render or git-secrets render <file-in> <file-out>")
+		}
+		return nil
+	},
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		cobra.CheckErr(projectCfgError)
 	},
@@ -49,7 +58,22 @@ var renderCmd = &cobra.Command{
 			decodedSecrets[secret.Name] = decodedSecret
 		}
 
-		for _, fileToRender := range selectedContext.FilesToRender {
+		var filesToRender []*config_generic.FileToRender
+		if len(args) == 0 {
+			if len(selectedContext.FilesToRender) == 0 {
+				cobra.CheckErr(fmt.Errorf("the context %s has no files to render. Use --file-in to render a custom file using this context", selectedContext.Name))
+			}
+			filesToRender = selectedContext.FilesToRender
+		} else {
+			filesToRender = append(filesToRender, &config_generic.FileToRender{
+				FileIn:  args[0],
+				FileOut: args[1],
+			})
+		}
+
+		fmt.Printf("Rendering as context %s ...\n\n", selectedContext.Name)
+
+		for _, fileToRender := range filesToRender {
 
 			renderContext := &RenderFileData{
 				UsedConfig:  projectCfgFile,
@@ -67,7 +91,7 @@ var renderCmd = &cobra.Command{
 				fmt.Println("")
 			}
 
-			tpl := template.New(fileToRender.FileIn)
+			tpl := template.New(path.Base(fileToRender.FileIn))
 			tpl.Funcs(getFuncMap())
 			tpl, errTpl := tpl.ParseFiles(fileToRender.FileIn)
 			if errTpl != nil {
@@ -94,7 +118,7 @@ var renderCmd = &cobra.Command{
 			if isDryRun {
 				fmt.Println()
 			} else {
-				fmt.Println("File Written:", fileToRender.FileOut)
+				fmt.Println(fileToRender.FileIn, "->", fileToRender.FileOut)
 			}
 
 		}
@@ -106,6 +130,8 @@ func init() {
 	rootCmd.AddCommand(renderCmd)
 
 	renderCmd.Flags().Bool(FlagDryRun, false, "Render files to os.stdout: --dry-run instead of writing")
+	renderCmd.Flags().StringP(FlagFileIn, "i", "", "Input file to render (requires also --file-out or -o flag)")
+	renderCmd.Flags().StringP(FlagFileOut, "o", "", "Output file to render (requires also --file-in or -i flag)")
 
 	// Here you will define your flags and configuration settings.
 
