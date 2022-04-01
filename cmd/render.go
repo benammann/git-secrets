@@ -7,10 +7,9 @@ import (
 	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
 	"github.com/spf13/cobra"
 	"html/template"
-	"os"
-	"path"
 )
 
+const FlagDebug = "debug"
 const FlagDryRun = "dry-run"
 const FlagFileIn = "file-in"
 const FlagFileOut = "file-out"
@@ -48,15 +47,7 @@ var renderCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		isDryRun, _ := cmd.Flags().GetBool(FlagDryRun)
-
-		decodedSecrets := make(map[string]string)
-		for _, secret := range projectCfg.GetCurrentSecrets() {
-			decodedSecret, errDecode := secret.Decode()
-			if errDecode != nil {
-				cobra.CheckErr(fmt.Errorf("could not decode secret %s: %s", secret.Name, errDecode.Error()))
-			}
-			decodedSecrets[secret.Name] = decodedSecret
-		}
+		isDebug, _ := cmd.Flags().GetBool(FlagDebug)
 
 		var filesToRender []*config_generic.FileToRender
 		if len(args) == 0 {
@@ -71,54 +62,34 @@ var renderCmd = &cobra.Command{
 			})
 		}
 
-		fmt.Printf("Rendering as context %s ...\n\n", selectedContext.Name)
-
 		for _, fileToRender := range filesToRender {
 
-			renderContext := &RenderFileData{
-				UsedConfig:  projectCfgFile,
-				UsedFile:    fileToRender,
-				UsedContext: selectedContext.Name,
-				Secrets:     decodedSecrets,
-			}
-
 			if isDryRun {
-				fmt.Println("")
-				fmt.Println("Would render file", fileToRender.FileIn, "to", fileToRender.FileOut)
-				renderContextJson, _ := json.MarshalIndent(renderContext, "", "  ")
-				fmt.Println("Available Variables:")
-				fmt.Println(string(renderContextJson))
-				fmt.Println("")
-			}
-
-			tpl := template.New(path.Base(fileToRender.FileIn))
-			tpl.Funcs(getFuncMap())
-			tpl, errTpl := tpl.ParseFiles(fileToRender.FileIn)
-			if errTpl != nil {
-				cobra.CheckErr(fmt.Errorf("could not read file contents of %s: %s", fileToRender.FileIn, errTpl.Error()))
-			}
-
-			fileOut := os.Stdout
-			if isDryRun == false {
-				fsFileOut, errFsFile := os.OpenFile(fileToRender.FileOut, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
-				if fsFileOut != nil {
-					defer fsFileOut.Close()
+				usedContext, fileContents, errRender := renderingEngine.RenderFile(fileToRender)
+				if isDebug {
+					fmt.Println(fileToRender.FileIn)
+					if usedContext != nil {
+						renderContextJson, _ := json.MarshalIndent(usedContext, "", "  ")
+						fmt.Println(string(renderContextJson))
+					}
 				}
-				if errFsFile != nil {
-					cobra.CheckErr(fmt.Errorf("could not open output file %s:%s", fileToRender.FileOut, errFsFile.Error()))
+				if errRender != nil {
+					cobra.CheckErr(fmt.Errorf("could not render file %s: %s", fileToRender.FileIn, errRender.Error()))
+					continue
 				}
-				fileOut = fsFileOut
-			}
-
-			errExecute := tpl.Execute(fileOut, renderContext)
-			if errExecute != nil {
-				cobra.CheckErr(fmt.Errorf("could not render file %s: %s", fileToRender.FileOut, errExecute.Error()))
-			}
-
-			if isDryRun {
-				fmt.Println()
+				fmt.Println(fileContents)
 			} else {
-				fmt.Println(fileToRender.FileIn, "->", fileToRender.FileOut)
+				usedContext, errWrite := renderingEngine.WriteFile(fileToRender)
+				if isDebug && usedContext != nil {
+					fmt.Println(fileToRender.FileIn)
+					renderContextJson, _ := json.MarshalIndent(usedContext, "", "  ")
+					fmt.Println(string(renderContextJson))
+				}
+				if errWrite != nil {
+					cobra.CheckErr(fmt.Errorf("could not write file %s: %s", fileToRender.FileIn, errWrite.Error()))
+					continue
+				}
+				fmt.Println(fileToRender.FileOut, "written")
 			}
 
 		}
@@ -130,6 +101,7 @@ func init() {
 	rootCmd.AddCommand(renderCmd)
 
 	renderCmd.Flags().Bool(FlagDryRun, false, "Render files to os.stdout: --dry-run instead of writing")
+	renderCmd.Flags().Bool(FlagDebug, false, "Also prints the rendering context to the console")
 	renderCmd.Flags().StringP(FlagFileIn, "i", "", "Input file to render (requires also --file-out or -o flag)")
 	renderCmd.Flags().StringP(FlagFileOut, "o", "", "Output file to render (requires also --file-in or -i flag)")
 

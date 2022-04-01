@@ -4,6 +4,7 @@ import (
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
 	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
 	config_parser "github.com/benammann/git-secrets/pkg/config/parser"
+	"github.com/benammann/git-secrets/pkg/render"
 	"github.com/spf13/cobra"
 	"os"
 
@@ -14,6 +15,7 @@ var globalCfgFile string
 var projectCfgFile string
 var projectCfg *config_generic.Repository
 var projectCfgError error
+var renderingEngine *render.RenderingEngine
 
 var selectedContext *config_generic.Context
 var contextName string
@@ -49,7 +51,7 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initGlobalConfig, initProjectConfig, resolveContext)
+	cobra.OnInitialize(initGlobalConfig, initProjectConfig, resolveContext, createRenderingEngine)
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
@@ -107,4 +109,10 @@ func resolveContext() {
 	desiredContext, errGetContext := projectCfg.SetSelectedContext(desiredContextName)
 	cobra.CheckErr(errGetContext)
 	selectedContext = desiredContext
+}
+
+func createRenderingEngine() {
+	if projectCfg != nil {
+		renderingEngine = render.NewRenderingEngine(projectCfg)
+	}
 }

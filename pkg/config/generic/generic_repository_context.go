@@ -62,10 +62,12 @@ func (c *Repository) SetSelectedContext(contextName string) (*Context, error) {
 	return desiredContext, nil
 }
 
+// GetCurrent returns the current context
 func (c *Repository) GetCurrent() *Context {
 	return c.context
 }
 
+// EncodeValue encodes the given value and returns it as a base64 string
 func (c *Context) EncodeValue(plainValue string) (encodedValue string, err error) {
 	encodedString, errEncode := c.Encryption.EncodeValue(plainValue)
 	if errEncode != nil {
@@ -74,6 +76,8 @@ func (c *Context) EncodeValue(plainValue string) (encodedValue string, err error
 	return base64.StdEncoding.EncodeToString([]byte(encodedString)), nil
 }
 
+// DecodeValue takes the value and decodes it
+// encodeValue must be base64
 func (c *Context) DecodeValue(encodedValue string) (decodedValue string, err error) {
 	decodedBase64Bytes, errB64 := base64.StdEncoding.DecodeString(encodedValue)
 	if errB64 != nil {
@@ -86,6 +90,7 @@ func (c *Context) DecodeValue(encodedValue string) (decodedValue string, err err
 	return decodedString, nil
 }
 
+// AddFileToRender adds a file to render which is later used by the rendering engine
 func (c *Context) AddFileToRender(fileIn string, fileOut string) error {
 
 	// check if output file is double defined

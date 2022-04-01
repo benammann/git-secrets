@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	config_init "github.com/benammann/git-secrets/pkg/config/init"
 	"github.com/spf13/cobra"
 	"strings"
 )
@@ -18,7 +19,7 @@ init path/to/my/file.yaml
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if projectCfg != nil {
-			cobra.CheckErr(fmt.Errorf("can not initialize while having config file %s loaded", projectCfgFile))
+			cobra.CheckErr(fmt.Errorf("can not initialize while having config file %s loaded. Please switch directories", projectCfgFile))
 		}
 		outputFile := ".git-secrets.yaml"
 		if len(args) == 1 {
@@ -29,7 +30,13 @@ init path/to/my/file.yaml
 			cobra.CheckErr(fmt.Errorf("output file %s must have .yaml file ending", outputFile))
 		}
 
-		fmt.Println("Writing", outputFile, "...")
+		errWrite := config_init.WriteInitialConfig(outputFile)
+		if errWrite != nil {
+			cobra.CheckErr(errWrite)
+		}
+
+		fmt.Println(outputFile, "written")
+
 	},
 }
 

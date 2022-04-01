@@ -55,16 +55,18 @@ var infoCmd = &cobra.Command{
 
 		}
 
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader(tableHeader)
-		table.SetBorder(false)
-		table.AppendBulk(tableData)
-		table.SetAlignment(tablewriter.ALIGN_LEFT)
-		table.Render()
-		fmt.Println()
+		if len(tableData) > 0 {
+			table := tablewriter.NewWriter(os.Stdout)
+			table.SetHeader(tableHeader)
+			table.SetBorder(false)
+			table.AppendBulk(tableData)
+			table.SetAlignment(tablewriter.ALIGN_LEFT)
+			table.Render()
+			fmt.Println()
 
-		if shouldDecode == false {
-			fmt.Println("Use --decode or -d to show the decoded secrets")
+			if shouldDecode == false {
+				fmt.Println("Use --decode or -d to show the decoded secrets")
+			}
 		}
 
 	},

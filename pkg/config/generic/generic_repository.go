@@ -4,6 +4,8 @@ import (
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
 )
 
+type SecretsMap map[string]string
+
 // NewRepository creates a new generic repository
 func NewRepository(configVersion int) *Repository {
 	return &Repository{

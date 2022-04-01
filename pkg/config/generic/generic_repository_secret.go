@@ -120,3 +120,22 @@ func (c *Repository) GetCurrentSecret(secretName string) *Secret {
 func (s *Secret) Decode() (string, error) {
 	return s.OriginContext.DecodeValue(s.EncodedValue)
 }
+
+// DecodeSecrets decodes the secrets of the current context and puts them into a map[string]string
+func (c *Repository) DecodeSecrets() (SecretsMap, error) {
+
+	// create the secrets map
+	secretsMap := make(SecretsMap)
+
+	// decode each secret
+	for _, secret := range c.GetCurrentSecrets() {
+		decodedSecret, errDecode := secret.Decode()
+		if errDecode != nil {
+			return nil, fmt.Errorf("could not decode secret %s: %s", secret.Name, errDecode.Error())
+		}
+		secretsMap[secret.Name] = decodedSecret
+	}
+
+	return secretsMap, nil
+
+}
