@@ -1,3 +1,4 @@
 git-secrets
 example/.env
 example/k8s-prod-secret.yaml
+.idea
