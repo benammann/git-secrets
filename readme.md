@@ -57,7 +57,7 @@ Features:
 Todo Alpha Release
 - [ ] Global Secret Management via CLI
 - [ ] Also store config values in .git-secrets.yaml
-- [ ] YAML Schema validation via JSON Schema
+- [x] YAML Schema validation via JSON Schema
 - [ ] More code documentation
 - [ ] Secret min requirements
 - [ ] File watches / Daemon
