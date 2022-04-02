@@ -10,7 +10,7 @@ import (
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Initializes a .git-secrets.yaml file",
+	Short: "Initializes a .git-secrets.json file",
 	Example: `
 init
 init path/to/my/file.yaml
@@ -21,13 +21,13 @@ init path/to/my/file.yaml
 		if projectCfg != nil {
 			cobra.CheckErr(fmt.Errorf("can not initialize while having config file %s loaded. Please switch directories", projectCfgFile))
 		}
-		outputFile := ".git-secrets.yaml"
+		outputFile := ".git-secrets.json"
 		if len(args) == 1 {
 			outputFile = args[0]
 		}
 
-		if !strings.HasSuffix(outputFile, ".yaml") {
-			cobra.CheckErr(fmt.Errorf("output file %s must have .yaml file ending", outputFile))
+		if !strings.HasSuffix(outputFile, ".json") {
+			cobra.CheckErr(fmt.Errorf("output file %s must have .json file ending", outputFile))
 		}
 
 		errWrite := config_init.WriteInitialConfig(outputFile)

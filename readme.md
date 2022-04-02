@@ -1,25 +1,38 @@
 ### Be Aware: Still WIP
 
 Usecase:
-you have a file named `.git-secrets.yaml` in your repository:
+you have a file named `.git-secrets.json` in your repository:
 
 ```
-version: 1
-context:
-  default:
-    decryptSecret:
-      fromName: git-secrets.example-default
-    secrets:
-      applicationAPassword: FTRldAR9SOt0/LuIFPbc1t5SHjq91I9XmaCL5Dg/AWJzQ/DY3DG5blpVTLH4hZYk4t1w+SRn5O4GhLiu
-      applicationBPassword: dCUK7Jfd5aB+WcI64AgX0/I7yT/OGMoUD0+uGgp5cs/smJAFvUWdBohNgmHg9KC4ExzWrt9beuCRorXI
-features:
-  renderFiles:
-    default:
-      files:
-        - fileIn: application-a/.env.dist
-          fileOut: application-a/.env
-        - fileIn: application-b/.env.dist
-          fileOut: application-b/.env
+{
+  "$schema": "../../schema/def/v1.json",
+  "version": 1,
+  "context": {
+    "default": {
+      "decryptSecret": {
+        "fromName": "git-secrets.example-default"
+      },
+      "secrets": {
+        "applicationAPassword": "FTRldAR9SOt0/LuIFPbc1t5SHjq91I9XmaCL5Dg/AWJzQ/DY3DG5blpVTLH4hZYk4t1w+SRn5O4GhLiu",
+        "applicationBPassword": "dCUK7Jfd5aB+WcI64AgX0/I7yT/OGMoUD0+uGgp5cs/smJAFvUWdBohNgmHg9KC4ExzWrt9beuCRorXI"
+      }
+    }
+  },
+  "renderFiles": {
+    "default": {
+      "files": [
+        {
+          "fileIn": "application-a/.env.dist",
+          "fileOut": "application-a/.env"
+        },
+        {
+          "fileIn": "application-b/.env.dist",
+          "fileOut": "application-b/.env"
+        }
+      ]
+    }
+  }
+}
 ```
 
 Decode Secrets globally defined at `~/.git-secrets.yaml`

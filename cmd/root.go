@@ -56,8 +56,9 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
+	// will be global for your application.
 	rootCmd.PersistentFlags().StringVar(&globalCfgFile, "global-config", "", "global config file (default is $HOME/.git-secrets.yaml)")
-	rootCmd.PersistentFlags().StringVarP(&projectCfgFile, "project-config", "f", ".git-secrets.yaml", "project config file (default is .git-secrets.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&projectCfgFile, "project-config", "f", ".git-secrets.json", "project config file (default is .git-secrets.json)")
 	rootCmd.PersistentFlags().StringVarP(&contextName, "context-name", "c", "", "context name (default is 'default')")
 	rootCmd.PersistentFlags().StringVar(&overwrites.OverwriteSecret, "secret", "", "use this secret instead of the secret in the config file")
 	rootCmd.PersistentFlags().StringVar(&overwrites.OverwriteSecretName, "secret-name", "", "use this secret name instead of the secret name in the config file")

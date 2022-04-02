@@ -19,7 +19,7 @@ func WriteInitialConfig(fileName string) error {
 	}
 
 	// read the init config
-	initConfig, errRead := staticFiles.ReadFile("files/init-config.yaml")
+	initConfig, errRead := staticFiles.ReadFile("files/init-config.json")
 	if errRead != nil {
 		return fmt.Errorf("could not open init template: %s", errRead.Error())
 	}

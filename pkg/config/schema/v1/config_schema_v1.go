@@ -1,44 +1,50 @@
 package config_schema_v1
 
 import (
+	"encoding/json"
 	"fmt"
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
 	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
 	"github.com/benammann/git-secrets/pkg/encryption"
-	"gopkg.in/yaml.v2"
+	"github.com/benammann/git-secrets/schema"
+	"github.com/xeipuuv/gojsonschema"
 	"sort"
 )
 
 type Schema struct {
-	Version  int      `yaml:"version"`
-	Context  Context  `yaml:"context"`
-	Features Features `yaml:"features"`
+	Version     int                                  `json:"version"`
+	Context     Context                              `json:"context"`
+	RenderFiles map[string]ContextAwareFilesToRender `json:"renderFiles"`
 }
 
 type DecryptSecret struct {
-	FromName string `yaml:"fromName"`
-	FromEnv  string `yaml:"fromEnv"`
+	FromName string `json:"fromName"`
+	FromEnv  string `json:"fromEnv"`
 }
 
 type ContextAwareSecrets struct {
-	DecryptSecret DecryptSecret     `yaml:"decryptSecret"`
-	Secrets       map[string]string `yaml:"secrets"`
+	DecryptSecret DecryptSecret     `json:"decryptSecret"`
+	Secrets       map[string]string `json:"secrets"`
 }
 
 type Context map[string]*ContextAwareSecrets
 
 type ContextAwareFileEntry struct {
-	FileIn  string `yaml:"fileIn"`
-	FileOut string `yaml:"fileOut"`
+	FileIn  string `json:"fileIn"`
+	FileOut string `json:"fileOut"`
 }
 
 type ContextAwareFilesToRender struct {
-	Files []ContextAwareFileEntry `yaml:"files"`
+	Files []ContextAwareFileEntry `json:"files"`
 }
 
 type Features struct {
-	RenderFiles map[string]ContextAwareFilesToRender `yaml:"renderFiles"`
-	Export      map[string]map[string]string         `yaml:"export"`
+}
+
+var jsonLoader gojsonschema.JSONLoader
+
+func init() {
+	jsonLoader = gojsonschema.NewStringLoader(string(schema.GetSchemaContents(schema.V1)))
 }
 
 func IsV1(version int) bool {
@@ -84,9 +90,11 @@ func (s *Schema) validate() error {
 
 	}
 
-	for renderFilesContextKey, _ := range s.Features.RenderFiles {
-		if s.Context[renderFilesContextKey] == nil {
-			return fmt.Errorf("context %s is defined in features.renderFiles but not in context.%s", renderFilesContextKey, renderFilesContextKey)
+	if s.RenderFiles != nil {
+		for renderFilesContextKey, _ := range s.RenderFiles {
+			if s.Context[renderFilesContextKey] == nil {
+				return fmt.Errorf("context %s is defined in features.renderFiles but not in context.%s", renderFilesContextKey, renderFilesContextKey)
+			}
 		}
 	}
 
@@ -94,14 +102,27 @@ func (s *Schema) validate() error {
 
 }
 
-func ParseSchemaV1(input []byte) (*config_generic.Repository, error) {
+func ParseSchemaV1(jsonInput []byte) (*config_generic.Repository, error) {
 
 	repository := config_generic.NewRepository(1)
 
+	jsonContentLoader := gojsonschema.NewStringLoader(string(jsonInput))
+	res, errValidate := gojsonschema.Validate(jsonLoader, jsonContentLoader)
+	if errValidate != nil {
+		return nil, fmt.Errorf("could not validate json schema: %s", errValidate.Error())
+	}
+
+	if res.Valid() == false {
+		for _, schemaErr := range res.Errors() {
+			fmt.Println(schemaErr.String())
+		}
+		return nil, fmt.Errorf("invalid json passed")
+	}
+
 	var Parsed Schema
-	errParse := yaml.Unmarshal(input, &Parsed)
+	errParse := json.Unmarshal(jsonInput, &Parsed)
 	if errParse != nil {
-		return nil, fmt.Errorf("could not parse yaml: %s", errParse.Error())
+		return nil, fmt.Errorf("could not parse json: %s", errParse.Error())
 	}
 
 	if errValidate := Parsed.validate(); errValidate != nil {
@@ -139,10 +160,10 @@ func ParseSchemaV1(input []byte) (*config_generic.Repository, error) {
 		context.Encryption = encryption.NewAesEngine(context.SecretResolver)
 	}
 
-	if Parsed.Features.RenderFiles != nil {
+	if Parsed.RenderFiles != nil {
 		for _, context := range contexts {
-			if Parsed.Features.RenderFiles[context.Name].Files != nil {
-				for _, fileToRender := range Parsed.Features.RenderFiles[context.Name].Files {
+			if Parsed.RenderFiles[context.Name].Files != nil {
+				for _, fileToRender := range Parsed.RenderFiles[context.Name].Files {
 					errAddFile := context.AddFileToRender(fileToRender.FileIn, fileToRender.FileOut)
 					if errAddFile != nil {
 						return nil, fmt.Errorf("could not add file (%s -> %s) to context %s: %s", fileToRender.FileIn, fileToRender.FileOut, context.Name, errAddFile.Error())

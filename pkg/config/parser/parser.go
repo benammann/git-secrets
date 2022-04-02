@@ -1,15 +1,17 @@
 package config_parser
 
 import (
+	"encoding/json"
 	"fmt"
 	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
 	config_schema_v1 "github.com/benammann/git-secrets/pkg/config/schema/v1"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"path/filepath"
+	yaml2 "sigs.k8s.io/yaml"
 )
 
 type VersionFixType struct {
-	Version int `yaml:"version"`
+	Version int `json:"version"`
 }
 
 func ParseRepository(pathToFile string) (*config_generic.Repository, error) {
@@ -19,10 +21,24 @@ func ParseRepository(pathToFile string) (*config_generic.Repository, error) {
 		return nil, fmt.Errorf("could not open file: %s", errRead.Error())
 	}
 
+	fileExtension := filepath.Ext(pathToFile)
+
+	if fileExtension == ".yaml" || fileExtension == ".yml" {
+		jsonBytes, errConvert := yaml2.YAMLToJSON(fileContents)
+		if errConvert != nil {
+			return nil, fmt.Errorf("could not convert yaml to json")
+		}
+		fileContents = jsonBytes
+	} else if fileExtension == ".json" {
+		// file contents is already json
+	} else {
+		return nil, fmt.Errorf("unsupported file extension: %s. Supported: yaml, json", fileExtension)
+	}
+
 	var VersionBase VersionFixType
-	errParse := yaml.Unmarshal(fileContents, &VersionBase)
+	errParse := json.Unmarshal(fileContents, &VersionBase)
 	if errParse != nil {
-		return nil, fmt.Errorf("could not parse yaml: %s", errParse.Error())
+		return nil, fmt.Errorf("could not parse json: %s", errParse.Error())
 	}
 
 	version := VersionBase.Version
