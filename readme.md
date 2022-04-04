@@ -55,11 +55,11 @@ Features:
 - Render .env files or kubernetes files and also kubernetes secrets (using the Base64 encode method) locally or in CI/CD
 
 Todo Alpha Release
-- [ ] Global Secret Management via CLI
+- [x] Global Secret Management via CLI
 - [ ] Also store config values in .git-secrets.yaml
 - [x] YAML Schema validation via JSON Schema
 - [ ] More code documentation
-- [ ] Secret min requirements
+- [x] Secret min requirements
 - [ ] File watches / Daemon
 - [ ] Add more examples
 - [ ] CI/CD via Github Actions
