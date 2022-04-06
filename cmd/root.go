@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	cli_config "github.com/benammann/git-secrets/pkg/config/cli"
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
 	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
 	config_parser "github.com/benammann/git-secrets/pkg/config/parser"
@@ -85,6 +86,8 @@ func initGlobalConfig() {
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
+	cli_config.SetDefaults()
+	viper.WatchConfig()
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {

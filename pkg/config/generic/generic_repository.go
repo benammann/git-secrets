@@ -7,9 +7,10 @@ import (
 type SecretsMap map[string]string
 
 // NewRepository creates a new generic repository
-func NewRepository(configVersion int) *Repository {
+func NewRepository(configVersion int, configFileUsed string) *Repository {
 	return &Repository{
 		configVersion: configVersion,
+		configFileUsed: configFileUsed,
 	}
 }
 
@@ -17,6 +18,9 @@ type Repository struct {
 
 	// configVersion hold the config version this repository is built from
 	configVersion int
+
+	// configFileUsed holds the abs path of the used config file
+	configFileUsed string
 
 	// context holds the current resolved context
 	context *Context

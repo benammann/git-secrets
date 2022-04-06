@@ -60,10 +60,11 @@ Todo Alpha Release
 - [x] YAML Schema validation via JSON Schema
 - [ ] More code documentation
 - [x] Secret min requirements
-- [ ] File watches / Daemon
+- [x] File watches / Daemon
 - [ ] Add more examples
 - [ ] CI/CD via Github Actions
 - [ ] Brew Repository
+- [ ] Modify .git-secrets.json (add encoded secrets)
 
 Todo Beta Release
 - [ ] Unit Testing

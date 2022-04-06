@@ -8,6 +8,7 @@ import (
 	"github.com/benammann/git-secrets/pkg/encryption"
 	"github.com/benammann/git-secrets/schema"
 	"github.com/xeipuuv/gojsonschema"
+	"path/filepath"
 	"sort"
 )
 
@@ -102,9 +103,9 @@ func (s *Schema) validate() error {
 
 }
 
-func ParseSchemaV1(jsonInput []byte) (*config_generic.Repository, error) {
+func ParseSchemaV1(jsonInput []byte, configFileUsed string) (*config_generic.Repository, error) {
 
-	repository := config_generic.NewRepository(1)
+	repository := config_generic.NewRepository(1, configFileUsed)
 
 	jsonContentLoader := gojsonschema.NewStringLoader(string(jsonInput))
 	res, errValidate := gojsonschema.Validate(jsonLoader, jsonContentLoader)
@@ -164,7 +165,10 @@ func ParseSchemaV1(jsonInput []byte) (*config_generic.Repository, error) {
 		for _, context := range contexts {
 			if Parsed.RenderFiles[context.Name].Files != nil {
 				for _, fileToRender := range Parsed.RenderFiles[context.Name].Files {
-					errAddFile := context.AddFileToRender(fileToRender.FileIn, fileToRender.FileOut)
+					configDir := filepath.Dir(configFileUsed)
+					fileIn := filepath.Join(configDir, fileToRender.FileIn)
+					fileOut := filepath.Join(configDir, fileToRender.FileOut)
+					errAddFile := context.AddFileToRender(fileIn, fileOut)
 					if errAddFile != nil {
 						return nil, fmt.Errorf("could not add file (%s -> %s) to context %s: %s", fileToRender.FileIn, fileToRender.FileOut, context.Name, errAddFile.Error())
 					}

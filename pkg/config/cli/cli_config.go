@@ -8,7 +8,13 @@ import (
 
 const (
 	Secrets = "secrets"
+	DaemonWatches = "daemon.watches"
 )
+
+func SetDefaults()  {
+	viper.SetDefault(Secrets, make(map[string]string))
+	viper.SetDefault(DaemonWatches, make(map[string]string))
+}
 
 func NamedSecret(secretName string) string {
 	return fmt.Sprintf("%s.%s", Secrets, secretName)
