@@ -51,6 +51,16 @@
                   "type": "string"
                 }
               }
+            },
+            "configs": {
+              "type": "object",
+              "description": "Specify your config values here",
+              "patternProperties": {
+                ".*": {
+                  "description": "Just put plain values here\nAvailable in the template via {{.Configs.myConfigValue}}",
+                  "type": "string"
+                }
+              }
             }
           },
           "required": [
@@ -96,11 +106,18 @@
                   "type": "string"
                 }
               }
+            },
+            "configs": {
+              "type": "object",
+              "description": "Specify your config values here",
+              "patternProperties": {
+                ".*": {
+                  "description": "Just put plain values here\nAvailable in the template via {{.Configs.myConfigValue}}",
+                  "type": "string"
+                }
+              }
             }
-          },
-          "required": [
-            "secrets"
-          ]
+          }
         }
       },
       "required": ["default"]

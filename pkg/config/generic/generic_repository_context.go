@@ -12,6 +12,7 @@ type Context struct {
 	SecretResolver   encryption.SecretResolver
 	Encryption       encryption.Engine
 	EncryptedSecrets map[string]string
+	Configs          map[string]string
 	FilesToRender    []*FileToRender
 }
 

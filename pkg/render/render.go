@@ -18,6 +18,7 @@ type RenderingContext struct {
 	ContextName string
 	File        *config_generic.FileToRender
 	Secrets     config_generic.SecretsMap
+	Configs     config_generic.ConfigMap
 }
 
 func NewRenderingEngine(repository *config_generic.Repository) *RenderingEngine {
@@ -39,9 +40,13 @@ func (e *RenderingEngine) CreateRenderingContext(fileToRender *config_generic.Fi
 		return nil, fmt.Errorf("could not create context secrets: %s", errSecrets.Error())
 	}
 
+	// get the config values
+	configMap := e.repository.GetConfigMap()
+
 	return &RenderingContext{
 		ContextName: e.repository.GetCurrent().Name,
 		Secrets:     secretsMap,
+		Configs:     configMap,
 		File:        fileToRender,
 	}, nil
 

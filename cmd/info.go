@@ -30,6 +30,29 @@ var infoCmd = &cobra.Command{
 		fmt.Printf("Available Contexts: %s\n", strings.Join(allContextNames, ", "))
 		fmt.Printf("\n")
 
+		configHeader := []string{"Config Key", "Config Value", "Origin Context"}
+
+		var configData [][]string
+
+		for _, config := range projectCfg.GetCurrentConfigs() {
+
+			tableRow := []string{config.Name, config.Value, config.OriginContext.Name}
+
+			configData = append(configData, tableRow)
+
+		}
+
+		if len(configData) > 0 {
+			table := tablewriter.NewWriter(os.Stdout)
+			table.SetHeader(configHeader)
+			table.SetBorder(false)
+			table.AppendBulk(configData)
+			table.SetAlignment(tablewriter.ALIGN_LEFT)
+			table.Render()
+			fmt.Println()
+
+		}
+
 		shouldDecode, _ := cmd.Flags().GetBool(InfoCmdFlagDecode)
 
 		tableHeader := []string{"Secret Name", "Origin Context"}

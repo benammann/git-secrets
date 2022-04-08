@@ -26,6 +26,7 @@ type DecryptSecret struct {
 type ContextAwareSecrets struct {
 	DecryptSecret DecryptSecret     `json:"decryptSecret"`
 	Secrets       map[string]string `json:"secrets"`
+	Configs       map[string]string `json:"configs"`
 }
 
 type Context map[string]*ContextAwareSecrets
@@ -143,6 +144,7 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string) (*config_generic.Rep
 		localContext := &config_generic.Context{
 			Name:             contextKey,
 			EncryptedSecrets: contextValue.Secrets,
+			Configs:          contextValue.Configs,
 		}
 		// reference the default context
 		if localContext.Name == config_const.DefaultContextName {
@@ -189,6 +191,17 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string) (*config_generic.Rep
 		}
 	}
 
+	var configs []*config_generic.Config
+	for _, context := range contexts {
+		for configKey, configValue := range context.Configs {
+			configs = append(configs, &config_generic.Config{
+				Name:          configKey,
+				Value:         configValue,
+				OriginContext: context,
+			})
+		}
+	}
+
 	for _, resultingContext := range contexts {
 		errAddContext := repository.AddContext(resultingContext)
 		if errAddContext != nil {
@@ -200,6 +213,13 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string) (*config_generic.Rep
 		errAddSecret := repository.AddSecret(secretOut)
 		if errAddSecret != nil {
 			return nil, fmt.Errorf("could not add secret to repository: %s", errAddSecret.Error())
+		}
+	}
+
+	for _, configOut := range configs {
+		errAddConfig := repository.AddConfig(configOut)
+		if errAddConfig != nil {
+			return nil, fmt.Errorf("could not add config to repository: %s", errAddConfig.Error())
 		}
 	}
 

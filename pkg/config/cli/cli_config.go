@@ -7,11 +7,11 @@ import (
 )
 
 const (
-	Secrets = "secrets"
+	Secrets       = "secrets"
 	DaemonWatches = "daemon.watches"
 )
 
-func SetDefaults()  {
+func SetDefaults() {
 	viper.SetDefault(Secrets, make(map[string]string))
 	viper.SetDefault(DaemonWatches, make(map[string]string))
 }

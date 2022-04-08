@@ -16,8 +16,7 @@ type Daemon struct {
 }
 
 func NewDaemon() *Daemon {
-	return &Daemon{
-	}
+	return &Daemon{}
 }
 
 func (d *Daemon) HandleFileChange(fileName string) {

@@ -5,11 +5,12 @@ import (
 )
 
 type SecretsMap map[string]string
+type ConfigMap map[string]string
 
 // NewRepository creates a new generic repository
 func NewRepository(configVersion int, configFileUsed string) *Repository {
 	return &Repository{
-		configVersion: configVersion,
+		configVersion:  configVersion,
 		configFileUsed: configFileUsed,
 	}
 }
@@ -30,6 +31,9 @@ type Repository struct {
 
 	// secrets holds all secrets of all contexts
 	secrets []*Secret
+
+	// configs holds all configs of all contexts
+	configs []*Config
 }
 
 // GetConfigVersion returns the config version this repository is built from
