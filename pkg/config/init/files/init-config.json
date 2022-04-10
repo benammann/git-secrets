@@ -1,31 +1,16 @@
 {
+  "$schema": "https://raw.githubusercontent.com/benammann/git-secrets/dev-beta/schema/def/v1.json",
   "version": 1,
   "context": {
     "default": {
-      "decodeSecret": {
-        "fromName": "my-secret-name"
+      "decryptSecret": {
+        "fromName": "your-global-secret-name-here"
       },
-      "secrets": {
-        "awesomeSecret": ""
-      }
+      "secrets": {},
+      "configs": {}
     },
-    "staging": {
+    "prod": {
       "secrets": {}
-    },
-    "production": {
-      "decodeSecret": {
-        "fromName": "my-staging-secret-name"
-      },
-      "secrets": {
-        "awesomeSecret": ""
-      }
-    }
-  },
-  "features": {
-    "renderFiles": {
-      "default": {
-        "files": []
-      }
     }
   }
 }
