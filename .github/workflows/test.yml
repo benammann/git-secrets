@@ -1,0 +1,21 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      # Install specific version of go
+      - name: Setup go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15
+      # Run unit test
+      - name: Test
+        run: go test ./...

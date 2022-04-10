@@ -17,7 +17,7 @@ var V1 FileName = "v1.json"
 func GetSchemaContents(schemaFileName FileName) []byte {
 	fileContents, fileErr := schemaDefinitions.ReadFile(fmt.Sprintf("def/%s", schemaFileName))
 	if fileErr != nil {
-		cobra.CheckErr(fmt.Errorf("could not load schema %s: %s", fileErr.Error()))
+		cobra.CheckErr(fmt.Errorf("could not load schema %s: %s", schemaFileName, fileErr.Error()))
 	}
 	return fileContents
 }
