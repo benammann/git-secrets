@@ -30,7 +30,7 @@ const FlagForce = "force"
 // globalSecretsCmd represents the globalSecrets command
 var globalSecretsCmd = &cobra.Command{
 	Use:     "global-secret",
-	Short:   "A brief description of your command",
+	Short:   "Configures the global secrets used to encrypt data",
 	Aliases: []string{"global-secrets"},
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:

@@ -17,23 +17,35 @@ package cmd
 
 import (
 	"fmt"
+	cli_config "github.com/benammann/git-secrets/pkg/config/cli"
 	"github.com/benammann/git-secrets/pkg/config/daemon"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"path/filepath"
 )
 
 // daemonCmd represents the daemon command
 var daemonCmd = &cobra.Command{
 	Use:   "daemon",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Args: cobra.MaximumNArgs(2),
+	Example: `
+git-secrets daemon
+git-secrets daemon <file-to-watch> <context>
+`,
+	Short: "automatically render files on config changes",
 	Run: func(cmd *cobra.Command, args []string) {
-		daemonInstance := daemon.NewDaemon()
-		fmt.Println(daemonInstance.Run())
+
+		if len(args) == 2 {
+			 file := args[0]
+			 context := args[1]
+			 absPath, errAbs := filepath.Abs(file)
+			 cobra.CheckErr(errAbs)
+			 viper.Set(fmt.Sprintf("%s.%s", cli_config.DaemonWatches, absPath), context)
+			 fmt.Println(absPath, "added to watches")
+		} else {
+			daemonInstance := daemon.NewDaemon()
+			fmt.Println(daemonInstance.Run())
+		}
 	},
 }
 
