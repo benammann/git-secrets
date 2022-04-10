@@ -29,3 +29,9 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+brews:
+  - name: git-secrets
+    homepage: https://github.com/benammann/homebrew-tap
+    tap:
+      owner: benammann
+      name: homebrew-tap
