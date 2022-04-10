@@ -12,7 +12,6 @@ const (
 )
 
 func SetDefaults() {
-	viper.SetDefault(Secrets, make(map[string]string))
 	viper.SetDefault(DaemonWatches, make(map[string]string))
 }
 

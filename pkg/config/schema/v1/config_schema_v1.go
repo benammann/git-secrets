@@ -13,20 +13,21 @@ import (
 )
 
 type Schema struct {
-	Version     int                                  `json:"version"`
-	Context     Context                              `json:"context"`
-	RenderFiles map[string]ContextAwareFilesToRender `json:"renderFiles"`
+	Schema      string                                `json:"$schema,omitempty"`
+	Version     int                                   `json:"version"`
+	Context     Context                               `json:"context"`
+	RenderFiles map[string]*ContextAwareFilesToRender `json:"renderFiles,omitempty"`
 }
 
 type DecryptSecret struct {
-	FromName string `json:"fromName"`
-	FromEnv  string `json:"fromEnv"`
+	FromName string `json:"fromName,omitempty"`
+	FromEnv  string `json:"fromEnv,omitempty"`
 }
 
 type ContextAwareSecrets struct {
-	DecryptSecret DecryptSecret     `json:"decryptSecret"`
-	Secrets       map[string]string `json:"secrets"`
-	Configs       map[string]string `json:"configs"`
+	DecryptSecret *DecryptSecret    `json:"decryptSecret,omitempty"`
+	Secrets       map[string]string `json:"secrets,omitempty"`
+	Configs       map[string]string `json:"configs,omitempty"`
 }
 
 type Context map[string]*ContextAwareSecrets
@@ -37,7 +38,7 @@ type ContextAwareFileEntry struct {
 }
 
 type ContextAwareFilesToRender struct {
-	Files []ContextAwareFileEntry `json:"files"`
+	Files []*ContextAwareFileEntry `json:"files"`
 }
 
 type Features struct {
@@ -66,6 +67,9 @@ func (s *Schema) validate() error {
 
 	// check for only one or none decryptSecret method
 	for contextKey, contextValue := range s.Context {
+		if contextValue.DecryptSecret == nil {
+			continue
+		}
 		if contextValue.DecryptSecret.FromEnv != "" && contextValue.DecryptSecret.FromName != "" {
 			return fmt.Errorf("context: %s: you can only use either one decryptSecret method (FromEnv or FromName)", contextKey)
 		}
@@ -105,8 +109,6 @@ func (s *Schema) validate() error {
 }
 
 func ParseSchemaV1(jsonInput []byte, configFileUsed string) (*config_generic.Repository, error) {
-
-	repository := config_generic.NewRepository(1, configFileUsed)
 
 	jsonContentLoader := gojsonschema.NewStringLoader(string(jsonInput))
 	res, errValidate := gojsonschema.Validate(jsonLoader, jsonContentLoader)
@@ -165,6 +167,9 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string) (*config_generic.Rep
 
 	if Parsed.RenderFiles != nil {
 		for _, context := range contexts {
+			if Parsed.RenderFiles[context.Name] == nil {
+				continue
+			}
 			if Parsed.RenderFiles[context.Name].Files != nil {
 				for _, fileToRender := range Parsed.RenderFiles[context.Name].Files {
 					configDir := filepath.Dir(configFileUsed)
@@ -202,6 +207,9 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string) (*config_generic.Rep
 		}
 	}
 
+	configWriter := NewV1Writer(Parsed, configFileUsed)
+	repository := config_generic.NewRepository(1, configFileUsed, configWriter)
+
 	for _, resultingContext := range contexts {
 		errAddContext := repository.AddContext(resultingContext)
 		if errAddContext != nil {
@@ -227,7 +235,10 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string) (*config_generic.Rep
 
 }
 
-func getSecretResolver(val DecryptSecret, defaultContext *config_generic.Context) encryption.SecretResolver {
+func getSecretResolver(val *DecryptSecret, defaultContext *config_generic.Context) encryption.SecretResolver {
+	if val == nil {
+		return defaultContext.SecretResolver
+	}
 	if val.FromEnv != "" {
 		return encryption.NewEnvSecretResolver(val.FromEnv)
 	}

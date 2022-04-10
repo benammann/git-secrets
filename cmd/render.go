@@ -13,6 +13,7 @@ const FlagDebug = "debug"
 const FlagDryRun = "dry-run"
 const FlagFileIn = "file-in"
 const FlagFileOut = "file-out"
+const FlagAdd = "add"
 
 type RenderFileData struct {
 	UsedConfig  string
@@ -48,6 +49,7 @@ var renderCmd = &cobra.Command{
 
 		isDryRun, _ := cmd.Flags().GetBool(FlagDryRun)
 		isDebug, _ := cmd.Flags().GetBool(FlagDebug)
+		isAdd, _ := cmd.Flags().GetBool(FlagAdd)
 
 		var filesToRender []*config_generic.FileToRender
 		if len(args) == 0 {
@@ -56,10 +58,19 @@ var renderCmd = &cobra.Command{
 			}
 			filesToRender = selectedContext.FilesToRender
 		} else {
-			filesToRender = append(filesToRender, &config_generic.FileToRender{
-				FileIn:  args[0],
-				FileOut: args[1],
-			})
+
+			if isAdd {
+				configWriter := projectCfg.GetConfigWriter()
+				errAdd := configWriter.AddFileToRender(projectCfg.GetCurrent().Name, args[0], args[1])
+				cobra.CheckErr(errAdd)
+				fmt.Printf("Render File %s/%s has been added to your config file.\n", args[0], args[1])
+				return
+			} else {
+				filesToRender = append(filesToRender, &config_generic.FileToRender{
+					FileIn:  args[0],
+					FileOut: args[1],
+				})
+			}
 		}
 
 		for _, fileToRender := range filesToRender {
@@ -104,6 +115,7 @@ func init() {
 	renderCmd.Flags().Bool(FlagDebug, false, "Also prints the rendering context to the console")
 	renderCmd.Flags().StringP(FlagFileIn, "i", "", "Input file to render (requires also --file-out or -o flag)")
 	renderCmd.Flags().StringP(FlagFileOut, "o", "", "Output file to render (requires also --file-in or -i flag)")
+	renderCmd.Flags().Bool(FlagAdd, false, "--add: Instead of rendering, add this entry to the config file")
 
 	// Here you will define your flags and configuration settings.
 

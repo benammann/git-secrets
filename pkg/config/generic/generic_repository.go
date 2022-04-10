@@ -2,16 +2,18 @@ package config_generic
 
 import (
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
+	"github.com/benammann/git-secrets/pkg/config/writer"
 )
 
 type SecretsMap map[string]string
 type ConfigMap map[string]string
 
 // NewRepository creates a new generic repository
-func NewRepository(configVersion int, configFileUsed string) *Repository {
+func NewRepository(configVersion int, configFileUsed string, configWriter writer.ConfigWriter) *Repository {
 	return &Repository{
 		configVersion:  configVersion,
 		configFileUsed: configFileUsed,
+		configWriter:   configWriter,
 	}
 }
 
@@ -34,6 +36,9 @@ type Repository struct {
 
 	// configs holds all configs of all contexts
 	configs []*Config
+
+	// configWriter allows to manipulate the current config
+	configWriter writer.ConfigWriter
 }
 
 // GetConfigVersion returns the config version this repository is built from
@@ -44,4 +49,9 @@ func (c *Repository) GetConfigVersion() int {
 // IsDefault returns if the default context is used
 func (c *Repository) IsDefault() bool {
 	return c.context.Name == config_const.DefaultContextName
+}
+
+// GetConfigWriter returns the current config writer
+func (c *Repository) GetConfigWriter() writer.ConfigWriter {
+	return c.configWriter
 }

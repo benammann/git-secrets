@@ -17,48 +17,35 @@ package cmd
 
 import (
 	"fmt"
-	cli_config "github.com/benammann/git-secrets/pkg/config/cli"
-	"github.com/benammann/git-secrets/pkg/config/daemon"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"path/filepath"
 )
 
-// daemonCmd represents the daemon command
-var daemonCmd = &cobra.Command{
-	Use:  "daemon",
-	Args: cobra.MaximumNArgs(2),
-	Example: `
-git-secrets daemon
-git-secrets daemon <file-to-watch> <context>
-`,
-	Short: "automatically render files on config changes",
+// addContextCmd represents the addContext command
+var addContextCmd = &cobra.Command{
+	Use:   "add-context",
+	Short: "adds a context to the existing config file",
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		cobra.CheckErr(projectCfgError)
+	},
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-
-		if len(args) == 2 {
-			file := args[0]
-			context := args[1]
-			absPath, errAbs := filepath.Abs(file)
-			cobra.CheckErr(errAbs)
-			viper.Set(fmt.Sprintf("%s.%s", cli_config.DaemonWatches, absPath), context)
-			fmt.Println(absPath, "added to watches")
-		} else {
-			daemonInstance := daemon.NewDaemon()
-			fmt.Println(daemonInstance.Run())
-		}
+		writer := projectCfg.GetConfigWriter()
+		errAdd := writer.AddContext(args[0])
+		cobra.CheckErr(errAdd)
+		fmt.Printf("the context %s has been added to your config file\n", args[0])
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(daemonCmd)
+	rootCmd.AddCommand(addContextCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// daemonCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// addContextCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// daemonCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// addContextCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
