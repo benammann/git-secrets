@@ -44,10 +44,10 @@ The configuration is made in a json file called `.git-secrets.json` you can also
 # Create a new .git-secrets.json
 git-secrets init
 
-#.git-secrets.json written
-#Info: git-secrets info -d
-#Add Context: git-secrets add-context <contextName>
-#Add Secret: git-secrets encode --write secretName
+# .git-secrets.json written
+# Info: git-secrets info -d
+# Add Context: git-secrets add-context <contextName>
+# Add Secret: git-secrets encode --write secretName
 
 # Get the initial information of the config file
 git-secrets info
@@ -60,9 +60,9 @@ You can encode secrets using the `git-secrets encode`
 # Encode a value (uses interactive input)
 git-secrets encode --write myAwesomeSecret
 
-#? Value to encode *****************
-#Secret myAwesomeSecret written to .git-secrets.json
-#Get the decoded value: git-secrets decode myAwesomeSecret
+# ? Value to encode *****************
+# Secret myAwesomeSecret written to .git-secrets.json
+# Get the decoded value: git-secrets decode myAwesomeSecret
 ```
 
 Now you can get it's decoded value using the following command
