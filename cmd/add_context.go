@@ -22,8 +22,9 @@ import (
 
 // addContextCmd represents the addContext command
 var addContextCmd = &cobra.Command{
-	Use:   "add-context",
-	Short: "adds a context to the existing config file",
+	Use:     "add-context",
+	Short:   "adds a context to the existing config file",
+	Example: "git-secrets add-context <contextName>",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		cobra.CheckErr(projectCfgError)
 	},

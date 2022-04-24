@@ -1,12 +1,10 @@
 package cmd
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
 	"github.com/spf13/cobra"
-	"html/template"
 )
 
 const FlagDebug = "debug"
@@ -22,20 +20,18 @@ type RenderFileData struct {
 	Secrets     map[string]string
 }
 
-func Base64Encode(args ...interface{}) string {
-	return base64.StdEncoding.EncodeToString([]byte(args[0].(string)))
-}
-
-func getFuncMap() template.FuncMap {
-	return template.FuncMap{
-		"Base64Encode": Base64Encode,
-	}
-}
-
 // renderCmd represents the render command
 var renderCmd = &cobra.Command{
 	Use:   "render",
 	Short: "render files feature",
+	Example: `
+git-secrets render: Render from configuration
+git-secrets render <fileIn> <fileOut> --debug: Render a specific file instead of the configured ones
+git-secrets render -c prod: Render files for the prod context
+git-secrets render --dry-run: Render files and print them to the console
+git-secrets render --dry-run --debug: Dry run render and shows the rendering context
+git-secrets render --debug: Render and write the rendering context
+`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if !(len(args) == 0 || len(args) == 2) {
 			return fmt.Errorf("usage: git-secrets render or git-secrets render <file-in> <file-out>")

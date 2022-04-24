@@ -2,26 +2,42 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/AlecAivazis/survey/v2"
 
 	"github.com/spf13/cobra"
 )
 
 const FlagWrite = "write"
+const FlagValue = "value"
 
 // encodeCmd represents the encode command
 var encodeCmd = &cobra.Command{
 	Use:   "encode",
-	Args:  cobra.MinimumNArgs(1),
-	Short: "Encodes a value",
-	Long:  "Encodes a value",
+	Args:  cobra.ExactArgs(0),
+	Short: "Encodes a value using the global secret configured in the current context",
+	Long:  "Encodes a value using the global secret configured in the current context. Use --write <secretKey> to write the encoded value directly to the .git-secrets.json file. Use --value <value> instead of hidden input.",
+	Example: `
+git-secrets encode: Encodes the secret using interactive ui
+git-secrets encode --write testKey: Encodes the secret and writes it to the current .git-secrets.json file
+git-secrets encode --write testKey --context prod: Writes the secret to the prod context instead
+git-secrets encode --write testKey --value "My Secret Value": INSECURE: Uses the value directly from the --value parameter
+`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		cobra.CheckErr(projectCfgError)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 
 		writeTo, _ := cmd.Flags().GetString(FlagWrite)
+		value, _ := cmd.Flags().GetString(FlagValue)
 
-		encodedValue, errEncode := selectedContext.EncodeValue(args[0])
+		if value == "" {
+			errAsk := survey.AskOne(&survey.Password{
+				Message: "Value to encode",
+			}, &value)
+			cobra.CheckErr(errAsk)
+		}
+
+		encodedValue, errEncode := selectedContext.EncodeValue(value)
 		cobra.CheckErr(errEncode)
 
 		if writeTo != "" {
@@ -29,6 +45,8 @@ var encodeCmd = &cobra.Command{
 			errWrite := writer.AddSecret(projectCfg.GetCurrent().Name, writeTo, encodedValue)
 			cobra.CheckErr(errWrite)
 			fmt.Println("Secret", writeTo, "written to .git-secrets.json")
+			fmt.Println("Get the decoded value: git-secrets decode", writeTo)
+
 		} else {
 			fmt.Println(encodedValue)
 		}
@@ -39,7 +57,8 @@ var encodeCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(encodeCmd)
 
-	encodeCmd.Flags().StringP(FlagWrite, "w", "", "-w <my-secret-name>: writes the secret to the current .git-secrets.json")
+	encodeCmd.Flags().String(FlagWrite, "", "--write <my-secret-name>: writes the secret to the current .git-secrets.json")
+	encodeCmd.Flags().String(FlagValue, "", "--value <my-secret-value>: INSECURE! Uses this value instead of interactive input")
 
 	// Here you will define your flags and configuration settings.
 

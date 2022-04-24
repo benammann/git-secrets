@@ -1,19 +1,23 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"github.com/AlecAivazis/survey/v2"
+	cli_config "github.com/benammann/git-secrets/pkg/config/cli"
 	config_init "github.com/benammann/git-secrets/pkg/config/init"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"os"
 	"strings"
 )
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Initializes a .git-secrets.json file",
+	Short: "initializes a new git-secrets project",
 	Example: `
-init
-init path/to/my/file.yaml
+git-secrets init
 `,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -21,21 +25,73 @@ init path/to/my/file.yaml
 		if projectCfg != nil {
 			cobra.CheckErr(fmt.Errorf("can not initialize while having config file %s loaded. Please switch directories", projectCfgFile))
 		}
-		outputFile := ".git-secrets.json"
-		if len(args) == 1 {
-			outputFile = args[0]
+
+		var secretKeys []string
+		for _, key := range viper.AllKeys() {
+			secretPrefix := fmt.Sprintf("%s.", cli_config.Secrets)
+			if strings.HasPrefix(key, secretPrefix) {
+				secretKeys = append(secretKeys, strings.Replace(key, secretPrefix, "", 1))
+			}
 		}
 
-		if !strings.HasSuffix(outputFile, ".json") {
-			cobra.CheckErr(fmt.Errorf("output file %s must have .json file ending", outputFile))
+		if len(secretKeys) < 0 {
+			cobra.CheckErr(fmt.Errorf("please create a global secret before: git-secrets global-secrets <secret-name> <secret-value>"))
 		}
 
-		errWrite := config_init.WriteInitialConfig(outputFile)
+		var outputFileQuestions = []*survey.Question{
+			{
+				Name: "outputFile",
+				Prompt: &survey.Input{
+					Message: "Output file",
+					Default: ".git-secrets.json",
+				},
+				Validate: func(ans interface{}) error {
+
+					outputFile := ans.(string)
+					if outputFile == "" {
+						return fmt.Errorf("the output file cannot be empty")
+					}
+
+					if _, err := os.Stat(outputFile); errors.Is(err, os.ErrExist) {
+						return fmt.Errorf("%s already exists", outputFile)
+					}
+
+					return nil
+
+				},
+			},
+			{
+				Name: "secretName",
+				Prompt: &survey.Select{
+					Message: "Which global secret should be used to encode / decode secrets:",
+					Options: secretKeys,
+				},
+				Validate: survey.Required,
+			},
+		}
+
+		questionResponse := struct {
+			OutputFile string `survey:"outputFile"`
+			SecretName string `survey:"secretName"`
+		}{}
+
+		if errAsk := survey.Ask(outputFileQuestions, &questionResponse); errAsk != nil {
+			cobra.CheckErr(fmt.Errorf("could not ask survey: %s", errAsk.Error()))
+		}
+
+		if !strings.HasSuffix(questionResponse.OutputFile, ".json") {
+			cobra.CheckErr(fmt.Errorf("output file %s must have .json file ending", questionResponse.OutputFile))
+		}
+
+		errWrite := config_init.WriteInitialConfig(questionResponse.OutputFile, questionResponse.SecretName)
 		if errWrite != nil {
 			cobra.CheckErr(errWrite)
 		}
 
-		fmt.Println(outputFile, "written")
+		fmt.Println(questionResponse.OutputFile, "written")
+		fmt.Println("Info: git-secrets info -d")
+		fmt.Println("Add Context: git-secrets add-context <contextName>")
+		fmt.Println("Add Secret: git-secrets encode --write secretName")
 
 	},
 }

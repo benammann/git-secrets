@@ -50,51 +50,25 @@ git-secrets init
 git-secrets info
 ```
 
-Now you need to replace the value of `contet.default.decryptSecret.fromName` by your global secret name. Example `mySecret`
-
-```json
-{
-  "context": {
-    "default": {
-      "decryptSecret": {
-        "fromName": "mySecret"
-      }
-    }
-  }
-}
-```
-
 ### Encode a secret and add it to the config file
 You can encode secrets using the `git-secrets encode`
 
 ```bash
-# Encode a value
-git-secrets encode "git-secrets rocks"
+# Encode a value (uses interactive input)
+git-secrets encode --write myAwesomeSecret
 
-# Result: G2gt4a+L4lJdYMJBG8f2eMsvTGMTFxduDoUwzwz/gdcmWvsBo+3Um+l9wOal
-```
-
-Now you need to put the result into your `.git-secrets.json` file. Example:
-
-```json
-{
-  "context": {
-    "default": {
-      "secrets": {
-        "testSecret": "G2gt4a+L4lJdYMJBG8f2eMsvTGMTFxduDoUwzwz/gdcmWvsBo+3Um+l9wOal"
-      }
-    }
-  }
-}
+#? Value to encode *****************
+#Secret myAwesomeSecret written to .git-secrets.json
+#Get the decoded value: git-secrets decode myAwesomeSecret
 ```
 
 Now you can get it's decoded value using the following command
 
 ```bash
 # Decode a value
-git-secrets decode testSecret
+git-secrets decode myAwesomeSecret
 
-# Result: git-secrets rocks
+# Result: Git Secrets Rocks
 ```
 
 ### More documentation is added soon

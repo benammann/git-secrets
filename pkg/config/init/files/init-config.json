@@ -4,7 +4,7 @@
   "context": {
     "default": {
       "decryptSecret": {
-        "fromName": "your-global-secret-name-here"
+        "fromName": "{{secretName}}"
       },
       "secrets": {},
       "configs": {}

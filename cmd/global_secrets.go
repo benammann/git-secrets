@@ -29,16 +29,15 @@ const FlagForce = "force"
 
 // globalSecretsCmd represents the globalSecrets command
 var globalSecretsCmd = &cobra.Command{
-	Use:     "global-secret",
-	Short:   "Configures the global secrets used to encrypt data",
+	Use:   "global-secret",
+	Short: "allows to manage the global secrets from ~/.git-secrets.yaml using the cli",
+	Example: `
+git-secrets global-secrets: get all global secret keys
+git-secrets global-secret <secretKey>: prints the global secret value
+git-secrets global-secret <secretKey> <secretValue>: sets the global secret value
+`,
 	Aliases: []string{"global-secrets"},
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Args: cobra.RangeArgs(0, 2),
+	Args:    cobra.RangeArgs(0, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 
 		isAlpha := regexp.MustCompile(`^[A-Za-z]+$`).MatchString
