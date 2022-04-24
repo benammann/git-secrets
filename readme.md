@@ -44,7 +44,10 @@ The configuration is made in a json file called `.git-secrets.json` you can also
 # Create a new .git-secrets.json
 git-secrets init
 
-# Result: .git-secrets.json written
+#.git-secrets.json written
+#Info: git-secrets info -d
+#Add Context: git-secrets add-context <contextName>
+#Add Secret: git-secrets encode --write secretName
 
 # Get the initial information of the config file
 git-secrets info
