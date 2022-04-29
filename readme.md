@@ -6,6 +6,20 @@ The main benefit is that you can render templates using the decoded values like 
 
 Be aware that this project is still under development and the api may change.
 
+### How does it work
+
+- For each Project / Context you can use a **Encoder Secret** which is stored at `~/.git-secrets.yaml`
+- The **Encoder Secret** is used to encode your passwords which are then stored inside your git repositories `.git-secrets.json`
+- The encrypted secrets are then decoded and rendered using Go Web Templates like Helm for example. (https://gowebexamples.com/templates/)
+- Each project can have multiple contexts for example `default` and `prod`
+- Every custom context inherits from the `default` context, so you don't have to define values twice
+- You can use a different **Encoder Secret** in each context so the engineer can only access the secrets he should need
+
+### Examples
+
+- Encoding / Decoding: [with-binary-example](examples/with-binary-example)
+- Kubernetes Secrets: [render-kubernetes-secret](examples/render-kubernetes-secret)
+
 ### Installation
 
 via Homebrew / Linuxbrew
