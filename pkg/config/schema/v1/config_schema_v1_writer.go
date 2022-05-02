@@ -25,6 +25,10 @@ func (v *V1Writer) AddSecret(contextName string, secretName string, secretEncode
 		return fmt.Errorf("the context %s does not exist", contextName)
 	}
 
+	if v.schema.Context[contextName].Secrets == nil {
+		v.schema.Context[contextName].Secrets = make(map[string]string)
+	}
+
 	if v.schema.Context[contextName].Secrets[secretName] != "" {
 		return fmt.Errorf("the secret %s does already exist. Please overwrite manually", secretName)
 	}
@@ -55,8 +59,14 @@ func (v *V1Writer) AddFileToRender(contextName string, fileIn string, fileOut st
 	absFileIn, _ := filepath.Abs(fileIn)
 	absFileOut, _ := filepath.Abs(fileIn)
 
+	if v.schema.RenderFiles == nil {
+		v.schema.RenderFiles = make(map[string]*ContextAwareFilesToRender)
+	}
+
 	if v.schema.RenderFiles[contextName] == nil {
-		v.schema.RenderFiles[contextName] = &ContextAwareFilesToRender{}
+		v.schema.RenderFiles[contextName] = &ContextAwareFilesToRender{
+			Files: []*ContextAwareFileEntry{},
+		}
 	}
 
 	fileAlreadyAdded := false

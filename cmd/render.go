@@ -9,8 +9,6 @@ import (
 
 const FlagDebug = "debug"
 const FlagDryRun = "dry-run"
-const FlagFileIn = "file-in"
-const FlagFileOut = "file-out"
 const FlagAdd = "add"
 
 type RenderFileData struct {
@@ -109,8 +107,6 @@ func init() {
 
 	renderCmd.Flags().Bool(FlagDryRun, false, "Render files to os.stdout: --dry-run instead of writing")
 	renderCmd.Flags().Bool(FlagDebug, false, "Also prints the rendering context to the console")
-	renderCmd.Flags().StringP(FlagFileIn, "i", "", "Input file to render (requires also --file-out or -o flag)")
-	renderCmd.Flags().StringP(FlagFileOut, "o", "", "Output file to render (requires also --file-in or -i flag)")
 	renderCmd.Flags().Bool(FlagAdd, false, "--add: Instead of rendering, add this entry to the config file")
 
 	// Here you will define your flags and configuration settings.
