@@ -34,12 +34,97 @@ or just head over to the [Releases](https://github.com/benammann/git-secrets/rel
 
 ## Getting started
 
-### Configure the global encoder secret
-First, you need to create or configure a global secret. For this example our secret is called `mySecret`
+### Initialize the project
+The configuration is made in a json file called `.git-secrets.json` you can also specify a custom path using `-f <path-to-custom-file>`
 
-Hint: Use a tool like `pwgen` to securely generate secrets locally. (Install via `brew install pwgen`)
+```bash
+# Create a new global encoder secret (which you can later share with your team)
+git-secrets global-secret mySecret $(pwgen -c 32 -n -s -y)
 
-Generate a global secret and set it to `mySecret`
+# Create a new .git-secrets.json
+git-secrets init
+
+# Get the initial information of the config file
+git-secrets info
+```
+
+### Encode a secret and add a config entry
+
+Git-Secrets allows you to store encrypted `Secrets` and plain `Configs` both are stored in `.git-secrets.json`
+
+```bash
+# Encode a value (uses interactive input)
+git-secrets set secret databasePassword
+
+# Add a new config value
+git-secrets set config databaseHost db-host.svc.local
+```
+
+### Decode the secrets and get the config entry
+
+```bash
+# Get the decoded value
+git-secrets get secret databasePassword
+
+# Get the value stored in databaseHost
+git-secrets get config databaseHost
+```
+
+### Create a `.env.dist` file
+
+Git-Secrets allows you to render files using the `Secret` and `Config` values on the fly using gotemplates, just like Helm. For a syntax reference head over to https://gowebexamples.com/templates/
+
+````text
+DATABASE_HOST={{.Configs.databaseHost}}
+DATABASE_PASSWORD={{.Secrets.databasePassword}}
+````
+
+Then add it to the local config file. You can specify multiple files to render for each context.
+
+````bash
+# always render .env.dist to .env
+git-secrets add file .env.dist .env
+
+# now execute the rendering process
+# this renders the .env.dist file to .env and fills out all variables
+git-secrets render
+````
+
+In case you want your files automatically to render in case of a file change in `.git-secrets.json` which may be triggered by a branch change for example you can use the daemon feature.
+
+````bash
+# add the file to the file watches and render its files using the default context
+git-secrets daemon .git-secrets.json default
+
+# then start the daemon
+git-secrets daemon
+
+# or start it as a background process
+git-secrets daemon &
+````
+
+## Documentation
+
+### How the encryption is done
+
+Git-Secrets uses AES-256 to encrypt / decrypt the secrets. Read more about it here [Advanced Encryption Standard](https://de.wikipedia.org/wiki/Advanced_Encryption_Standard).
+
+The encryption key is stored outside your git repository and can be referenced using multiple methods
+
+The implementation can be found here [engine_aes.go](pkg/encryption/engine_aes.go).
+
+#### Named Secrets
+Named secrets are stored in `~/.git-secrets.yaml` and have a name. You can than reference it using the `context.decryptSecret.fromName` key.
+
+````
+"decryptSecret": {
+    "fromName": "withbinaryexample"
+},
+````
+
+You can define a `decryptSecret` in each context to for example encrypt the production secrets using a different encryption key. This can be useful to not let your developers know the CI/CD Secrets.
+
+The CLI provides multiple ways how to configure and manage your global secrets.
 ```bash
 # Generate via pwgen 
 git-secrets global-secret mySecret $(pwgen -c 32 -n -s -y)
@@ -54,39 +139,22 @@ git-secrets global-secret mySecret
 git-secrets global-secret
 ```
 
-### Initialize the project
-The configuration is made in a json file called `.git-secrets.json` you can also specify a custom path using `-f <path-to-custom-file>`
+#### Overwrite using CLI Args
+
+In case you don't want to store the secrets globally and on the disk you can also use the following cli args to inject the secrets at runtime
 
 ```bash
-# Create a new .git-secrets.json
-git-secrets init
+# Uses the secret passed via --secret (insecure)
+git-secrets get secret mySecret --secret <mySecret>
 
-# .git-secrets.json written
-# Info: git-secrets info -d
-# Add Context: git-secrets add-context <contextName>
-# Add Secret: git-secrets encode --write secretName
-
-# Get the initial information of the config file
-git-secrets info
+# Uses the value stored in the environment variable ENV_VARIABLE_CONTAINING_SECRET as secret
+git-secrets get secret mySecret --secret-from-env ENV_VARIABLE_CONTAINING_SECRET
 ```
 
-### Encode a secret and add it to the config file
-You can encode secrets using the `git-secrets encode`
+### Context
 
-```bash
-# Encode a value (uses interactive input)
-git-secrets set secret myAwesomeSecret
+### Secrets
 
-# ? Value to encode *****************
-# Secret myAwesomeSecret written to .git-secrets.json
-# Get the decoded value: git-secrets decode myAwesomeSecret
-```
+### Configs
 
-Now you can get it's decoded value using the following command
-
-```bash
-# Decode a value
-git-secrets get secret myAwesomeSecret
-
-# Result: Git Secrets Rocks
-```
+### File rendering
