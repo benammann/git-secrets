@@ -25,8 +25,6 @@ import (
 	"strings"
 )
 
-const FlagForce = "force"
-
 // globalSecretsCmd represents the globalSecrets command
 var globalSecretsCmd = &cobra.Command{
 	Use:   "global-secret",

@@ -3,8 +3,8 @@ package config_schema_v1
 import (
 	"encoding/json"
 	"fmt"
+	config_const "github.com/benammann/git-secrets/pkg/config/const"
 	"os"
-	"path/filepath"
 )
 
 type V1Writer struct {
@@ -19,7 +19,7 @@ func NewV1Writer(schema Schema, configPath string) *V1Writer {
 	}
 }
 
-func (v *V1Writer) AddSecret(contextName string, secretName string, secretEncodedValue string) error {
+func (v *V1Writer) SetSecret(contextName string, secretName string, secretEncodedValue string, force bool) error {
 
 	if v.schema.Context[contextName] == nil {
 		return fmt.Errorf("the context %s does not exist", contextName)
@@ -29,11 +29,31 @@ func (v *V1Writer) AddSecret(contextName string, secretName string, secretEncode
 		v.schema.Context[contextName].Secrets = make(map[string]string)
 	}
 
-	if v.schema.Context[contextName].Secrets[secretName] != "" {
-		return fmt.Errorf("the secret %s does already exist. Please overwrite manually", secretName)
+	if v.schema.Context[contextName].Secrets[secretName] != "" && force == false {
+		return fmt.Errorf("the secret %s does already exist. Use --force to overwrite", secretName)
 	}
 
 	v.schema.Context[contextName].Secrets[secretName] = secretEncodedValue
+
+	return v.WriteConfig()
+
+}
+
+func (v *V1Writer) SetConfig(contextName string, configName string, configValue string, force bool) error {
+
+	if v.schema.Context[contextName] == nil {
+		return fmt.Errorf("the context %s does not exist. Use git-secrets add context <contextName> to add a context", contextName)
+	}
+
+	if v.schema.Context[contextName].Configs == nil {
+		v.schema.Context[contextName].Configs = make(map[string]string)
+	}
+
+	if v.schema.Context[contextName].Configs[configName] != "" && force == false {
+		return fmt.Errorf("the config entry %s does already exist. Use --force to overwrite", configName)
+	}
+
+	v.schema.Context[contextName].Configs[configName] = configValue
 
 	return v.WriteConfig()
 
@@ -56,9 +76,6 @@ func (v *V1Writer) AddContext(contextName string) error {
 
 func (v *V1Writer) AddFileToRender(contextName string, fileIn string, fileOut string) error {
 
-	absFileIn, _ := filepath.Abs(fileIn)
-	absFileOut, _ := filepath.Abs(fileIn)
-
 	if v.schema.RenderFiles == nil {
 		v.schema.RenderFiles = make(map[string]*ContextAwareFilesToRender)
 	}
@@ -71,11 +88,7 @@ func (v *V1Writer) AddFileToRender(contextName string, fileIn string, fileOut st
 
 	fileAlreadyAdded := false
 	for _, fileToRender := range v.schema.RenderFiles[contextName].Files {
-
-		absFileInCurrent, _ := filepath.Abs(fileToRender.FileIn)
-		absFileOutCurrent, _ := filepath.Abs(fileToRender.FileOut)
-
-		if absFileInCurrent == absFileIn && absFileOutCurrent == absFileOut {
+		if fileToRender.FileIn == fileIn && fileToRender.FileOut == fileOut {
 			fileAlreadyAdded = true
 			break
 		}
@@ -96,6 +109,12 @@ func (v *V1Writer) AddFileToRender(contextName string, fileIn string, fileOut st
 }
 
 func (v *V1Writer) WriteConfig() error {
+
+	for contextName, context := range v.schema.Context {
+		if context.Secrets == nil && contextName == config_const.DefaultContextName {
+			context.Secrets = make(map[string]string)
+		}
+	}
 
 	if errValidate := v.schema.validate(); errValidate != nil {
 		return fmt.Errorf("not writing config since it is not valid: %s", errValidate.Error())

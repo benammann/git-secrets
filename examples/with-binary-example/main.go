@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func main()  {
+func main() {
 
 	ParseEnv(".env")
 
@@ -18,12 +18,12 @@ func main()  {
 	DebugEnv("Database Password", "DATABASE_PASSWORD")
 }
 
-func DebugEnv(description string, envName string)  {
+func DebugEnv(description string, envName string) {
 	fmt.Printf("%s: %s\n", description, os.Getenv(envName))
 }
 
 // ParseEnv is a custom env parser, not respecting any specs just for this example
-func ParseEnv(fileName string)  {
+func ParseEnv(fileName string) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		log.Fatal(err)

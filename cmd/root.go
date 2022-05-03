@@ -27,6 +27,11 @@ var overwriteSecret string
 var overwriteSecretName string
 var overwriteSecretEnv string
 
+const FlagValue = "value"
+const FlagForce = "force"
+const FlagDebug = "debug"
+const FlagDryRun = "dry-run"
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use: "git-secrets",

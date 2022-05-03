@@ -109,9 +109,9 @@ func (c *Repository) GetCurrentConfigs() (res []*Config) {
 
 // GetCurrentConfig takes the merged Configs from GetCurrentConfigs and returns the needed one
 func (c *Repository) GetCurrentConfig(ConfigName string) *Config {
-	for _, Config := range c.GetCurrentConfigs() {
-		if Config.Name == ConfigName {
-			return Config
+	for _, config := range c.GetCurrentConfigs() {
+		if config.Name == ConfigName {
+			return config
 		}
 	}
 	return nil

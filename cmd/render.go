@@ -7,10 +7,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const FlagDebug = "debug"
-const FlagDryRun = "dry-run"
-const FlagAdd = "add"
-
 type RenderFileData struct {
 	UsedConfig  string
 	UsedContext string
@@ -43,7 +39,6 @@ git-secrets render --debug: Render and write the rendering context
 
 		isDryRun, _ := cmd.Flags().GetBool(FlagDryRun)
 		isDebug, _ := cmd.Flags().GetBool(FlagDebug)
-		isAdd, _ := cmd.Flags().GetBool(FlagAdd)
 
 		var filesToRender []*config_generic.FileToRender
 		if len(args) == 0 {
@@ -52,19 +47,10 @@ git-secrets render --debug: Render and write the rendering context
 			}
 			filesToRender = selectedContext.FilesToRender
 		} else {
-
-			if isAdd {
-				configWriter := projectCfg.GetConfigWriter()
-				errAdd := configWriter.AddFileToRender(projectCfg.GetCurrent().Name, args[0], args[1])
-				cobra.CheckErr(errAdd)
-				fmt.Printf("Render File %s/%s has been added to your config file.\n", args[0], args[1])
-				return
-			} else {
-				filesToRender = append(filesToRender, &config_generic.FileToRender{
-					FileIn:  args[0],
-					FileOut: args[1],
-				})
-			}
+			filesToRender = append(filesToRender, &config_generic.FileToRender{
+				FileIn:  args[0],
+				FileOut: args[1],
+			})
 		}
 
 		for _, fileToRender := range filesToRender {
@@ -107,15 +93,5 @@ func init() {
 
 	renderCmd.Flags().Bool(FlagDryRun, false, "Render files to os.stdout: --dry-run instead of writing")
 	renderCmd.Flags().Bool(FlagDebug, false, "Also prints the rendering context to the console")
-	renderCmd.Flags().Bool(FlagAdd, false, "--add: Instead of rendering, add this entry to the config file")
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// renderCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// renderCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
