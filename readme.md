@@ -1,5 +1,8 @@
 ## encryption and rendering engine for git repositories
 
+![Release Badge](https://github.com/benammann/git-secrets/actions/workflows/release.yml/badge.svg)
+![Test Badge](https://github.com/benammann/git-secrets/actions/workflows/test.yml/badge.svg)
+
 Git-Secrets allows you to add encrypted values to your git repository and decode them locally. The encrypted version is left in the upstream, the decoded version kept locally.
 
 The main benefit is that you can render templates using the decoded values like `.env` file or event kubernetes deployment files. More details: https://github.com/benammann/git-secrets/tree/dev-beta/examples
