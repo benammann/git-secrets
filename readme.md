@@ -18,6 +18,14 @@ Be aware that this project is still under development and the api may change.
 - Every custom context inherits from the `default` context, so you don't have to define values twice
 - You can use a different **Encoder Secret** in each context so the engineer can only access the secrets he should need
 
+### Demo
+
+<p align="center">
+  <img alt="Light" src="docs/git-secrets-init-demo.gif" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Dark" src="docs/git-secrets-contexts-demo.gif" width="45%">
+</p>
+
 ### Examples
 
 - Encoding / Decoding: [with-binary-example](examples/with-binary-example)
