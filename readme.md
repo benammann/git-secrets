@@ -20,11 +20,11 @@ Be aware that this project is still under development and the api may change.
 
 ### Demo
 
-<p align="center">
-  <img alt="Light" src="docs/git-secrets-init-demo.gif" width="45%">
-&nbsp; &nbsp; &nbsp; &nbsp;
-  <img alt="Dark" src="docs/git-secrets-contexts-demo.gif" width="45%">
-</p>
+#### Initialize a new project
+![](docs/git-secrets-init-demo.gif)
+
+#### Add a new context and secret
+![](docs/git-secrets-contexts-demo.gif)
 
 ### Examples
 
