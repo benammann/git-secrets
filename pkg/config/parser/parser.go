@@ -14,7 +14,7 @@ type VersionFixType struct {
 	Version int `json:"version"`
 }
 
-func ParseRepository(pathToFile string) (*config_generic.Repository, error) {
+func ParseRepository(pathToFile string, overwrittenSecrets map[string]string) (*config_generic.Repository, error) {
 	pathToFile, errAbs := filepath.Abs(pathToFile)
 	if errAbs != nil {
 		return nil, fmt.Errorf("could not create absolute file path of config file: %s", errAbs.Error())
@@ -47,7 +47,7 @@ func ParseRepository(pathToFile string) (*config_generic.Repository, error) {
 
 	version := VersionBase.Version
 	if config_schema_v1.IsV1(version) {
-		configOut, errConfigOut := config_schema_v1.ParseSchemaV1(fileContents, pathToFile)
+		configOut, errConfigOut := config_schema_v1.ParseSchemaV1(fileContents, pathToFile, overwrittenSecrets)
 		if errConfigOut != nil {
 			return nil, fmt.Errorf("could not parse as v1: %s", errConfigOut.Error())
 		}

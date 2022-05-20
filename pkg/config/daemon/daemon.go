@@ -21,7 +21,7 @@ func NewDaemon() *Daemon {
 
 func (d *Daemon) HandleFileChange(fileName string) {
 
-	parsedRepo, errParse := config_parser.ParseRepository(fileName)
+	parsedRepo, errParse := config_parser.ParseRepository(fileName, make(map[string]string))
 	if errParse != nil {
 		return
 	}

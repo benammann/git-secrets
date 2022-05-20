@@ -8,6 +8,7 @@ import (
 	"github.com/benammann/git-secrets/pkg/render"
 	"github.com/spf13/cobra"
 	"os"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -21,11 +22,7 @@ var renderingEngine *render.RenderingEngine
 var selectedContext *config_generic.Context
 var contextName string
 
-var overwrites config_generic.ConfigCliArgs
-
-var overwriteSecret string
-var overwriteSecretName string
-var overwriteSecretEnv string
+var overwrittenSecrets []string
 
 const FlagValue = "value"
 const FlagForce = "force"
@@ -66,9 +63,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&globalCfgFile, "global-config", "", "global config file (default is $HOME/.git-secrets.yaml)")
 	rootCmd.PersistentFlags().StringVarP(&projectCfgFile, "project-config", "f", ".git-secrets.json", "project config file (default is .git-secrets.json)")
 	rootCmd.PersistentFlags().StringVarP(&contextName, "context-name", "c", "", "context name (default is 'default')")
-	rootCmd.PersistentFlags().StringVar(&overwrites.OverwriteSecret, "secret", "", "use this secret instead of the secret in the config file")
-	rootCmd.PersistentFlags().StringVar(&overwrites.OverwriteSecretName, "secret-name", "", "use this secret name instead of the secret name in the config file")
-	rootCmd.PersistentFlags().StringVar(&overwrites.OverwriteSecretEnv, "secret-from-env", "", "use this environment variable instead of the environment var in the config file")
+	rootCmd.PersistentFlags().StringArrayVar(&overwrittenSecrets, "secret", []string{}, "--secret secretA=$(SECRET_A_VALUE) --secret secretB=$(SECRET_B_VALUE): Pass 1-n secret names. Make sure to use environment variables to fill them!")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
@@ -101,10 +96,19 @@ func initGlobalConfig() {
 }
 
 func initProjectConfig() {
-	projectCfg, projectCfgError = config_parser.ParseRepository(projectCfgFile)
-	if projectCfgError == nil {
-		projectCfg.MergeWithCliArgs(overwrites)
+
+	overwrittenSecretsMap := make(map[string]string)
+	for _, secretKeyValue := range overwrittenSecrets {
+		splitSecret := strings.Split(secretKeyValue, "=")
+		if len(splitSecret) != 2 {
+			cobra.CheckErr("Invalid Secret passed. Usage: --secret mySecret=mySecretValue")
+		}
+		secretKey, secretValue := splitSecret[0], splitSecret[1]
+		overwrittenSecretsMap[secretKey] = secretValue
 	}
+
+	projectCfg, projectCfgError = config_parser.ParseRepository(projectCfgFile, overwrittenSecretsMap)
+
 }
 
 func resolveContext() {

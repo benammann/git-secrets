@@ -153,10 +153,7 @@ In case you don't want to store the secrets globally and on the disk you can als
 
 ```bash
 # Uses the secret passed via --secret (insecure)
-git-secrets get secret mySecret --secret <mySecret>
-
-# Uses the value stored in the environment variable ENV_VARIABLE_CONTAINING_SECRET as secret
-git-secrets get secret mySecret --secret-from-env ENV_VARIABLE_CONTAINING_SECRET
+git-secrets get secret mySecret --secret secretName=$(SECRET_VALUE) --secret secretName1=$(SECRET_VALUE_1)
 ```
 
 ### Context

@@ -7,6 +7,7 @@ import (
 	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
 	"github.com/benammann/git-secrets/pkg/encryption"
 	"github.com/benammann/git-secrets/schema"
+	"github.com/spf13/viper"
 	"github.com/xeipuuv/gojsonschema"
 	"path/filepath"
 	"sort"
@@ -108,7 +109,7 @@ func (s *Schema) validate() error {
 
 }
 
-func ParseSchemaV1(jsonInput []byte, configFileUsed string) (*config_generic.Repository, error) {
+func ParseSchemaV1(jsonInput []byte, configFileUsed string, overwrittenSecrets map[string]string) (*config_generic.Repository, error) {
 
 	jsonContentLoader := gojsonschema.NewStringLoader(string(jsonInput))
 	res, errValidate := gojsonschema.Validate(jsonLoader, jsonContentLoader)
@@ -161,7 +162,7 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string) (*config_generic.Rep
 	})
 
 	for _, context := range contexts {
-		context.SecretResolver = getSecretResolver(Parsed.Context[context.Name].DecryptSecret, defaultContext)
+		context.SecretResolver = getSecretResolver(Parsed.Context[context.Name].DecryptSecret, defaultContext, overwrittenSecrets)
 		context.Encryption = encryption.NewAesEngine(context.SecretResolver)
 	}
 
@@ -235,7 +236,7 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string) (*config_generic.Rep
 
 }
 
-func getSecretResolver(val *DecryptSecret, defaultContext *config_generic.Context) encryption.SecretResolver {
+func getSecretResolver(val *DecryptSecret, defaultContext *config_generic.Context, overwrittenSecrets map[string]string) encryption.SecretResolver {
 	if val == nil {
 		return defaultContext.SecretResolver
 	}
@@ -243,7 +244,14 @@ func getSecretResolver(val *DecryptSecret, defaultContext *config_generic.Contex
 		return encryption.NewEnvSecretResolver(val.FromEnv)
 	}
 	if val.FromName != "" {
-		return encryption.NewNameSecretResolver(val.FromName)
+		return encryption.NewMergedSecretResolver(val.FromName, &ViperStringResolver{}, overwrittenSecrets)
 	}
 	return defaultContext.SecretResolver
+}
+
+type ViperStringResolver struct {
+}
+
+func (v *ViperStringResolver) GetString(key string) string {
+	return viper.GetString(key)
 }
