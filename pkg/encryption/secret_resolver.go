@@ -30,7 +30,7 @@ func (m *MergedSecretResolver) GetPlainSecret() (secret []byte, errResolve error
 	configKey := cli_config.NamedSecret(m.requestedSecretName)
 	configValue := m.configResolver.GetString(configKey)
 	if configValue == "" {
-		return nil, fmt.Errorf("secret %s can not be found globally. Either pass --secret %s=$(MY_SECRET_NAME) or configure it using git secret global-secret", configKey, configKey)
+		return nil, fmt.Errorf("secret %s can not be found globally. Either pass --secret %s=$(MY_SECRET_NAME) or configure it using git secret global-secret", m.requestedSecretName, m.requestedSecretName)
 	}
 	return []byte(configValue), nil
 
