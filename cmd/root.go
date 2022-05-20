@@ -99,12 +99,12 @@ func initProjectConfig() {
 
 	overwrittenSecretsMap := make(map[string]string)
 	for _, secretKeyValue := range overwrittenSecrets {
-		splitSecret := strings.Split(secretKeyValue, "=")
-		if len(splitSecret) != 2 {
+		splitSecret := strings.SplitN(secretKeyValue, "=", 2)
+		if len(splitSecret) < 2 {
 			cobra.CheckErr("Invalid Secret passed. Usage: --secret mySecret=mySecretValue")
 		}
-		secretKey, secretValue := splitSecret[0], splitSecret[1]
-		overwrittenSecretsMap[secretKey] = secretValue
+		secretKey, secretValues := splitSecret[0], splitSecret[1:]
+		overwrittenSecretsMap[secretKey] = strings.Join(secretValues, "")
 	}
 
 	projectCfg, projectCfgError = config_parser.ParseRepository(projectCfgFile, overwrittenSecretsMap)
