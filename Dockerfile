@@ -15,12 +15,10 @@ COPY . .
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o git-secrets main.go
 
-FROM bash
+FROM alpine:latest
 WORKDIR /git-secrets
 
-RUN apk add --no-cache bash
-RUN apk add curl
-RUN apk add git
+RUN apk --no-cache add ca-certificates git
 
 RUN mkdir -p bin
 
