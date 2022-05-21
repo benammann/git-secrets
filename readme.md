@@ -40,6 +40,37 @@ brew install benammann/tap/git-secrets
 
 or just head over to the [Releases](https://github.com/benammann/git-secrets/releases) page and download the prebuilt binary manually
 
+### Using Docker
+
+There is also a Docker Image available: `benammann/git-secrets`.
+
+Since git-secrets normally depends on a global `.git-secrets.yaml` you need to use the `--secret` parameter to pass the encryption secret using cli.
+You also need to mount the project's `.git-secrets.json` file using docker volume mounts.
+
+````bash
+# just execute the help command
+docker run benamnann/git-secrets help
+
+# get all the information about the .git-secrets.json file
+docker run \
+  # mount .git-secrets.json to /git-secrets/.git-secrets.json
+  -v $PWD/.git-secrets.json:/git-secrets/.git-secrets.json \
+  # use the official docker image
+  benammann/git-secrets \
+  # execute the info command
+  info
+  
+docker run \
+  # mount .git-secrets.json to /git-secrets/.git-secrets.json
+  -v $PWD/.git-secrets.json:/git-secrets/.git-secrets.json \
+  # use the official docker image
+  benammann/git-secrets \
+  # pass the encryption secret 'gitsecretspublic' including it's value from an local Environment variable to docker
+  --secret gitsecretspublic=${SECRET_VALUE} \
+  # decrypt the secret crToken
+  get secret crToken 
+````
+
 ## Getting started
 
 ### Initialize the project

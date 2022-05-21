@@ -71,13 +71,20 @@ func init() {
 
 // initGlobalConfig reads in config file and ENV variables if set.
 func initGlobalConfig() {
+
+	shouldCheckErr := len(overwrittenSecrets) == 0
+
 	if globalCfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(globalCfgFile)
 	} else {
 		// Find home directory.
 		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
+		if shouldCheckErr == true {
+			cobra.CheckErr(err)
+		} else if err != nil {
+			return
+		}
 
 		// Search config in home directory with name ".git-secrets" (without extension).
 		viper.AddConfigPath(home)
@@ -87,11 +94,12 @@ func initGlobalConfig() {
 
 	viper.AutomaticEnv() // read in environment variables that match
 	cli_config.SetDefaults()
-	viper.WatchConfig()
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-
+	if _, err := os.Stat(viper.ConfigFileUsed()); err == nil {
+		// If a config file is found, read it in.
+		if errRead := viper.ReadInConfig(); errRead == nil {
+			cobra.CheckErr(errRead)
+		}
+		viper.WatchConfig()
 	}
 }
 
