@@ -1,7 +1,12 @@
 ## encryption and rendering engine for git repositories
 
-![Release Badge](https://github.com/benammann/git-secrets/actions/workflows/release.yml/badge.svg)
-![Test Badge](https://github.com/benammann/git-secrets/actions/workflows/test.yml/badge.svg)
+![Brew Install Badge](https://img.shields.io/github/downloads/benammann/git-secrets/total?label=brew%20installs)
+![Docker Pulls Badge](https://img.shields.io/docker/pulls/benammann/git-secrets)
+![Tag](https://img.shields.io/github/v/release/benammann/git-secrets?label=brew%20tag)
+![Docker Image Version](https://img.shields.io/docker/v/benammann/git-secrets?label=docker%20image%20tag)
+![Release Badge](https://github.com/benammann/git-secrets/actions/workflows/brew-release.yml/badge.svg)
+![Test Badge](https://github.com/benammann/git-secrets/actions/workflows/docker-release.yml/badge.svg)
+![License](https://img.shields.io/github/license/benammann/git-secrets)
 
 Git-Secrets allows you to add encrypted values to your git repository and decode them locally. The encrypted version is left in the upstream, the decoded version kept locally.
 
