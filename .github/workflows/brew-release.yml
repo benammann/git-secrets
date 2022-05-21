@@ -1,4 +1,4 @@
-name: Release
+name: Release brew package
 
 on:
   push:

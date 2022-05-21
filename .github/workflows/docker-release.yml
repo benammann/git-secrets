@@ -1,4 +1,4 @@
-name: Release
+name: Release docker image
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  goreleaser:
+  releasedocker:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -37,7 +37,7 @@ jobs:
       - name: Remove ref from tag
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Remove v from release version
-        run: echo "IMAGE_TAG=${RELEASE_VERSION:1}"
+        run: echo "IMAGE_TAG=${RELEASE_VERSION:1}" >> $GITHUB_ENV
       - name: Docker Tag latest as build tag
         run: docker tag "$IMAGE_NAME:latest" "$IMAGE_NAME:$IMAGE_TAG"
       - name: Docker Push build tag
