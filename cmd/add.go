@@ -47,11 +47,15 @@ git-secrets add file <fileIn> <fileOut> -c prod
 		cobra.CheckErr(projectCfgError)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		targetName, _ := cmd.Flags().GetString(FlagTarget)
+		if targetName == "" {
+			cobra.CheckErr(fmt.Errorf("you must specify a target name: -t or --target <targetName>"))
+		}
 		fileIn, fileOut := args[0], args[1]
 		configWrite := projectCfg.GetConfigWriter()
-		cobra.CheckErr(configWrite.AddFileToRender(projectCfg.GetCurrent().Name, fileIn, fileOut))
+		cobra.CheckErr(configWrite.AddFileToRender(targetName, fileIn, fileOut))
 		fmt.Printf("Render File %s/%s has been added to your config file.\n", fileIn, fileOut)
-		fmt.Println("To render the file use: git-secrets render")
+		fmt.Printf("To render the file use: git-secrets render %s or git-secrets render %s -c <contextName>\n", targetName, targetName)
 	},
 }
 
@@ -59,4 +63,5 @@ func init() {
 	rootCmd.AddCommand(addCmd)
 	addCmd.AddCommand(addContextCmd)
 	addCmd.AddCommand(addFileCmd)
+	addFileCmd.Flags().StringP(FlagTarget, "t", "", "sets the target: --target <targetName>")
 }

@@ -74,20 +74,20 @@ func (v *V1Writer) AddContext(contextName string) error {
 
 }
 
-func (v *V1Writer) AddFileToRender(contextName string, fileIn string, fileOut string) error {
+func (v *V1Writer) AddFileToRender(targetName string, fileIn string, fileOut string) error {
 
 	if v.schema.RenderFiles == nil {
-		v.schema.RenderFiles = make(map[string]*ContextAwareFilesToRender)
+		v.schema.RenderFiles = make(map[string]*RenderTarget)
 	}
 
-	if v.schema.RenderFiles[contextName] == nil {
-		v.schema.RenderFiles[contextName] = &ContextAwareFilesToRender{
-			Files: []*ContextAwareFileEntry{},
+	if v.schema.RenderFiles[targetName] == nil {
+		v.schema.RenderFiles[targetName] = &RenderTarget{
+			Files: []*RenderTargetFileEntry{},
 		}
 	}
 
 	fileAlreadyAdded := false
-	for _, fileToRender := range v.schema.RenderFiles[contextName].Files {
+	for _, fileToRender := range v.schema.RenderFiles[targetName].Files {
 		if fileToRender.FileIn == fileIn && fileToRender.FileOut == fileOut {
 			fileAlreadyAdded = true
 			break
@@ -96,10 +96,10 @@ func (v *V1Writer) AddFileToRender(contextName string, fileIn string, fileOut st
 	}
 
 	if fileAlreadyAdded {
-		return fmt.Errorf("the combination %s / %s is already added to context %s", fileIn, fileOut, contextName)
+		return fmt.Errorf("the combination %s / %s is already added to target %s", fileIn, fileOut, targetName)
 	}
 
-	v.schema.RenderFiles[contextName].Files = append(v.schema.RenderFiles[contextName].Files, &ContextAwareFileEntry{
+	v.schema.RenderFiles[targetName].Files = append(v.schema.RenderFiles[targetName].Files, &RenderTargetFileEntry{
 		FileIn:  fileIn,
 		FileOut: fileOut,
 	})

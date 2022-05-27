@@ -13,12 +13,6 @@ type Context struct {
 	Encryption       encryption.Engine
 	EncryptedSecrets map[string]string
 	Configs          map[string]string
-	FilesToRender    []*FileToRender
-}
-
-type FileToRender struct {
-	FileIn  string
-	FileOut string
 }
 
 // AddContext adds a context and does some validations
@@ -89,22 +83,4 @@ func (c *Context) DecodeValue(encodedValue string) (decodedValue string, err err
 		return "", errDecode
 	}
 	return decodedString, nil
-}
-
-// AddFileToRender adds a file to render which is later used by the rendering engine
-func (c *Context) AddFileToRender(fileIn string, fileOut string) error {
-
-	// check if output file is double defined
-	for _, fileToRender := range c.FilesToRender {
-		if fileToRender.FileOut == fileOut {
-			return fmt.Errorf("output file %s is already defined on context %s", fileOut, c.Name)
-		}
-	}
-
-	c.FilesToRender = append(c.FilesToRender, &FileToRender{
-		FileIn:  fileIn,
-		FileOut: fileOut,
-	})
-
-	return nil
 }

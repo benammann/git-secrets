@@ -14,10 +14,10 @@ import (
 )
 
 type Schema struct {
-	Schema      string                                `json:"$schema,omitempty"`
-	Version     int                                   `json:"version"`
-	Context     Context                               `json:"context"`
-	RenderFiles map[string]*ContextAwareFilesToRender `json:"renderFiles,omitempty"`
+	Schema      string                   `json:"$schema,omitempty"`
+	Version     int                      `json:"version"`
+	Context     Context                  `json:"context"`
+	RenderFiles map[string]*RenderTarget `json:"renderFiles,omitempty"`
 }
 
 type DecryptSecret struct {
@@ -33,13 +33,13 @@ type ContextAwareSecrets struct {
 
 type Context map[string]*ContextAwareSecrets
 
-type ContextAwareFileEntry struct {
+type RenderTargetFileEntry struct {
 	FileIn  string `json:"fileIn"`
 	FileOut string `json:"fileOut"`
 }
 
-type ContextAwareFilesToRender struct {
-	Files []*ContextAwareFileEntry `json:"files"`
+type RenderTarget struct {
+	Files []*RenderTargetFileEntry `json:"files"`
 }
 
 type Features struct {
@@ -97,14 +97,6 @@ func (s *Schema) validate() error {
 
 	}
 
-	if s.RenderFiles != nil {
-		for renderFilesContextKey, _ := range s.RenderFiles {
-			if s.Context[renderFilesContextKey] == nil {
-				return fmt.Errorf("context %s is defined in features.renderFiles but not in context.%s", renderFilesContextKey, renderFilesContextKey)
-			}
-		}
-	}
-
 	return nil
 
 }
@@ -140,7 +132,8 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string, overwrittenSecrets m
 	// locally store the default context
 	var defaultContext *config_generic.Context
 
-	//var renderFileContexts []*base.RenderFilesContext
+	// all render targets to add
+	var renderTargets []*config_generic.RenderTarget
 
 	// first, initialize all contexts
 	for contextKey, contextValue := range Parsed.Context {
@@ -167,20 +160,19 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string, overwrittenSecrets m
 	}
 
 	if Parsed.RenderFiles != nil {
-		for _, context := range contexts {
-			if Parsed.RenderFiles[context.Name] == nil {
-				continue
-			}
-			if Parsed.RenderFiles[context.Name].Files != nil {
-				for _, fileToRender := range Parsed.RenderFiles[context.Name].Files {
+		for targetName, renderTarget := range Parsed.RenderFiles {
+			if renderTarget.Files != nil {
+				finalRenderTarget := config_generic.NewRenderTarget(targetName)
+				for _, fileToRender := range renderTarget.Files {
 					configDir := filepath.Dir(configFileUsed)
 					fileIn := filepath.Join(configDir, fileToRender.FileIn)
 					fileOut := filepath.Join(configDir, fileToRender.FileOut)
-					errAddFile := context.AddFileToRender(fileIn, fileOut)
+					errAddFile := finalRenderTarget.AddFileToRender(fileIn, fileOut)
 					if errAddFile != nil {
-						return nil, fmt.Errorf("could not add file (%s -> %s) to context %s: %s", fileToRender.FileIn, fileToRender.FileOut, context.Name, errAddFile.Error())
+						return nil, fmt.Errorf("could not add file (%s -> %s) to target %s: %s", fileToRender.FileIn, fileToRender.FileOut, finalRenderTarget.Name, errAddFile.Error())
 					}
 				}
+				renderTargets = append(renderTargets, finalRenderTarget)
 			}
 		}
 	}
@@ -229,6 +221,12 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string, overwrittenSecrets m
 		errAddConfig := repository.AddConfig(configOut)
 		if errAddConfig != nil {
 			return nil, fmt.Errorf("could not add config to repository: %s", errAddConfig.Error())
+		}
+	}
+
+	for _, renderTargetOut := range renderTargets {
+		if errAddTarget := repository.AddRenderTarget(renderTargetOut); errAddTarget != nil {
+			return nil, fmt.Errorf("could not add render target: %s", errAddTarget.Error())
 		}
 	}
 

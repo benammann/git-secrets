@@ -5,6 +5,7 @@ import (
 	"fmt"
 	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 type RenderFileData struct {
@@ -19,16 +20,16 @@ var renderCmd = &cobra.Command{
 	Use:   "render",
 	Short: "render files feature",
 	Example: `
-git-secrets render: Render from configuration
+git-secrets render <targetName>: Render from configuration
 git-secrets render <fileIn> <fileOut> --debug: Render a specific file instead of the configured ones
-git-secrets render -c prod: Render files for the prod context
-git-secrets render --dry-run: Render files and print them to the console
-git-secrets render --dry-run --debug: Dry run render and shows the rendering context
-git-secrets render --debug: Render and write the rendering context
+git-secrets render <targetName> -c prod: Render files for the prod context
+git-secrets render <targetName> --dry-run: Render files and print them to the console
+git-secrets render <targetName> --dry-run --debug: Dry run render and shows the rendering context
+git-secrets render <targetName> --debug: Render and write the rendering target
 `,
 	Args: func(cmd *cobra.Command, args []string) error {
-		if !(len(args) == 0 || len(args) == 2) {
-			return fmt.Errorf("usage: git-secrets render or git-secrets render <file-in> <file-out>")
+		if !(len(args) == 1 || len(args) == 2) {
+			return fmt.Errorf("usage: git-secrets render <target> or git-secrets render <file-in> <file-out>")
 		}
 		return nil
 	},
@@ -41,11 +42,18 @@ git-secrets render --debug: Render and write the rendering context
 		isDebug, _ := cmd.Flags().GetBool(FlagDebug)
 
 		var filesToRender []*config_generic.FileToRender
-		if len(args) == 0 {
-			if len(selectedContext.FilesToRender) == 0 {
+		if len(args) == 1 {
+
+			requestedTarget := projectCfg.GetRenderTarget(args[0])
+			if requestedTarget == nil {
+				cobra.CheckErr(fmt.Errorf("the render target %s does not exist. Available targets: %s", args[0], strings.Join(projectCfg.RenderTargetNames(), ", ")))
+			}
+
+			if len(requestedTarget.FilesToRender) == 0 {
 				cobra.CheckErr(fmt.Errorf("the context %s has no files to render. Use --file-in to render a custom file using this context", selectedContext.Name))
 			}
-			filesToRender = selectedContext.FilesToRender
+
+			filesToRender = requestedTarget.FilesToRender
 		} else {
 			filesToRender = append(filesToRender, &config_generic.FileToRender{
 				FileIn:  args[0],

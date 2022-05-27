@@ -38,6 +38,8 @@ git-secrets global-secret <secretKey> <secretValue>: sets the global secret valu
 	Args:    cobra.RangeArgs(0, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 
+		fmt.Println(viper.AllKeys())
+
 		isAlpha := regexp.MustCompile(`^[A-Za-z]+$`).MatchString
 
 		isSet := len(args) == 2

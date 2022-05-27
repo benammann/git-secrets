@@ -37,6 +37,9 @@ type Repository struct {
 	// configs holds all configs of all contexts
 	configs []*Config
 
+	// render targets holds all renderTargets
+	renderTargets []*RenderTarget
+
 	// configWriter allows to manipulate the current config
 	configWriter writer.ConfigWriter
 }

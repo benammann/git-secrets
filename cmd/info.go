@@ -33,6 +33,7 @@ git-secrets info -d -c prod: Decodes all secrets from the prod context
 
 		fmt.Printf("Config File: %s (Version: %d)\n", projectCfgFile, projectCfg.GetConfigVersion())
 		fmt.Printf("Available Contexts: %s\n", strings.Join(allContextNames, ", "))
+		fmt.Printf("Available Render Targets: %s\n", strings.Join(projectCfg.RenderTargetNames(), ", "))
 		fmt.Printf("\n")
 
 		configHeader := []string{"Config Key", "Config Value", "Origin Context"}

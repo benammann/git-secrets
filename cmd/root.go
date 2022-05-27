@@ -28,6 +28,7 @@ const FlagValue = "value"
 const FlagForce = "force"
 const FlagDebug = "debug"
 const FlagDryRun = "dry-run"
+const FlagTarget = "target"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -94,11 +95,11 @@ func initGlobalConfig() {
 
 	viper.AutomaticEnv() // read in environment variables that match
 	cli_config.SetDefaults()
+	// If a config file is found, read it in.
+	if errRead := viper.ReadInConfig(); errRead == nil {
+		cobra.CheckErr(errRead)
+	}
 	if _, err := os.Stat(viper.ConfigFileUsed()); err == nil {
-		// If a config file is found, read it in.
-		if errRead := viper.ReadInConfig(); errRead == nil {
-			cobra.CheckErr(errRead)
-		}
 		viper.WatchConfig()
 	}
 }

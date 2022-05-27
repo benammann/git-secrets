@@ -11,7 +11,7 @@
 git-secrets global-secret withbinaryexample XahcoQuae0wie3nooy0vuneiyaiy6phe
 
 # Use the prod context
-git-secrets render -c prod && go run main.go
+git-secrets render env -c prod && go run main.go
 
 # Expected Output:
 # .env written
@@ -23,7 +23,7 @@ git-secrets render -c prod && go run main.go
 
 
 # Use the default context
-git-secrets render && go run main.go
+git-secrets render env && go run main.go
 
 # Expected Output:
 # .env written

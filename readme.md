@@ -99,29 +99,22 @@ DATABASE_HOST={{.Configs.databaseHost}}
 DATABASE_PASSWORD={{.Secrets.databasePassword}}
 ````
 
-Then add it to the local config file. You can specify multiple files to render for each context.
+You can have custom renderTargets to render files. For example `env` or `k8s`. You can than add multiple files to a renderTargets.
 
 ````bash
 # always render .env.dist to .env
-git-secrets add file .env.dist .env
+# uses the targetName: env
+git-secrets add file .env.dist .env -t env
 
 # now execute the rendering process
-# this renders the .env.dist file to .env and fills out all variables
-git-secrets render
+# this renders the .env.dist file to .env and fills out all variables using the default context
+# targetName: env
+git-secrets render env
+
+# renders the files using the prod context
+git-secrets render env -c prod
 ````
 
-In case you want your files automatically to render in case of a file change in `.git-secrets.json` which may be triggered by a branch change for example you can use the daemon feature.
-
-````bash
-# add the file to the file watches and render its files using the default context
-git-secrets daemon .git-secrets.json default
-
-# then start the daemon
-git-secrets daemon
-
-# or start it as a background process
-git-secrets daemon &
-````
 
 ### Using Docker
 
