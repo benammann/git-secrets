@@ -8,7 +8,7 @@
 
 ````bash
 # Configure the Encoder Secret used in this example
-git-secrets global-secret withbinaryexample XahcoQuae0wie3nooy0vuneiyaiy6phe
+git-secrets global-secret withbinaryexample --value XahcoQuae0wie3nooy0vuneiyaiy6phe
 
 # Use the prod context
 git-secrets render env -c prod && go run main.go

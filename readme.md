@@ -59,7 +59,7 @@ The configuration is made in a json file called `.git-secrets.json` you can also
 
 ```bash
 # Create a new global encoder secret (which you can later share with your team)
-git secrets global-secret mySecret $(pwgen -c 32 -n -s -y)
+git secrets global-secret mySecret --value $(pwgen -c 32 -n -s -y)
 
 # Create a new .git-secrets.json
 git secrets init
@@ -178,17 +178,17 @@ You can define a `decryptSecret` in each context to for example encrypt the prod
 
 The CLI provides multiple ways how to configure and manage your global secrets.
 ```bash
-# Generate via pwgen 
-git secrets global-secret mySecret $(pwgen -c 32 -n -s -y)
+# Generate via pwgen and read from stdin
+git secrets set global-secret mySecret --value $(pwgen -c 32 -n -s -y)
 
-# Set manually
-git secrets global-secret mySecret <my-secret-here>
+# Set manually using interactive input
+git secrets set global-secret mySecret
 
 # Get the written secret
-git secrets global-secret mySecret
+git secrets get global-secret mySecret
 
 # Get all global secret names
-git secrets global-secret
+git secrets get global-secrets
 ```
 
 #### Overwrite using CLI Args
