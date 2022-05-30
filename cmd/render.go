@@ -21,6 +21,7 @@ var renderCmd = &cobra.Command{
 	Short: "render files feature",
 	Example: `
 git-secrets render <targetName>: Render from configuration
+git-secrets render <targetName1>,<targetName2>,...: Renders multiple targets at once
 git-secrets render <fileIn> <fileOut> --debug: Render a specific file instead of the configured ones
 git-secrets render <targetName> -c prod: Render files for the prod context
 git-secrets render <targetName> --dry-run: Render files and print them to the console
@@ -44,16 +45,27 @@ git-secrets render <targetName> --debug: Render and write the rendering target
 		var filesToRender []*config_generic.FileToRender
 		if len(args) == 1 {
 
-			requestedTarget := projectCfg.GetRenderTarget(args[0])
-			if requestedTarget == nil {
-				cobra.CheckErr(fmt.Errorf("the render target %s does not exist. Available targets: %s", args[0], strings.Join(projectCfg.RenderTargetNames(), ", ")))
+			nonUniqueTargets := strings.Split(args[0], ",")
+			uniqueTargets := make(map[string]bool)
+
+			for _, nonUniqueTarget := range nonUniqueTargets {
+				if !uniqueTargets[nonUniqueTarget] {
+					uniqueTargets[nonUniqueTarget] = true
+				}
 			}
 
-			if len(requestedTarget.FilesToRender) == 0 {
-				cobra.CheckErr(fmt.Errorf("the context %s has no files to render. Use --file-in to render a custom file using this context", selectedContext.Name))
+			for requestedTargetName := range uniqueTargets {
+				requestedTarget := projectCfg.GetRenderTarget(requestedTargetName)
+				if requestedTarget == nil {
+					cobra.CheckErr(fmt.Errorf("the render target %s does not exist. Available targets: %s", args[0], strings.Join(projectCfg.RenderTargetNames(), ", ")))
+				}
+				filesToRender = append(filesToRender, requestedTarget.FilesToRender...)
 			}
 
-			filesToRender = requestedTarget.FilesToRender
+			if len(filesToRender) == 0 {
+				cobra.CheckErr(fmt.Errorf("could not resolve any files to render. Use --file-in to render a custom file using this context"))
+			}
+
 		} else {
 			filesToRender = append(filesToRender, &config_generic.FileToRender{
 				FileIn:  args[0],
