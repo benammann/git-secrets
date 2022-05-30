@@ -59,13 +59,13 @@ The configuration is made in a json file called `.git-secrets.json` you can also
 
 ```bash
 # Create a new global encoder secret (which you can later share with your team)
-git-secrets global-secret mySecret $(pwgen -c 32 -n -s -y)
+git secrets global-secret mySecret $(pwgen -c 32 -n -s -y)
 
 # Create a new .git-secrets.json
-git-secrets init
+git secrets init
 
 # Get the initial information of the config file
-git-secrets info
+git secrets info
 ```
 
 ### Encode a secret and add a config entry
@@ -74,20 +74,28 @@ Git-Secrets allows you to store encrypted `Secrets` and plain `Configs` both are
 
 ```bash
 # Encode a value (uses interactive input)
-git-secrets set secret databasePassword
+git secrets set secret databasePassword
+
+# Write the value to a custom context
+# Add Context: git secrets add context dev
+git secrets set secret databasePassword -c dev
 
 # Add a new config value
-git-secrets set config databaseHost db-host.svc.local
+git secrets set config databaseHost db-host.svc.local
+
+# Write the config value to a custom context
+# Add Context: git secrets add context dev
+git secrets set config databaseHost db-host.my-dev-db.svc -c dev
 ```
 
 ### Decode the secrets and get the config entry
 
 ```bash
 # Get the decoded value
-git-secrets get secret databasePassword
+git secrets get secret databasePassword
 
 # Get the value stored in databaseHost
-git-secrets get config databaseHost
+git secrets get config databaseHost
 ```
 
 ### Create a `.env.dist` file
@@ -104,15 +112,15 @@ You can have custom renderTargets to render files. For example `env` or `k8s`. Y
 ````bash
 # always render .env.dist to .env
 # uses the targetName: env
-git-secrets add file .env.dist .env -t env
+git secrets add file .env.dist .env -t env
 
 # now execute the rendering process
 # this renders the .env.dist file to .env and fills out all variables using the default context
 # targetName: env
-git-secrets render env
+git secrets render env
 
 # renders the files using the prod context
-git-secrets render env -c prod
+git secrets render env -c prod
 ````
 
 
@@ -171,16 +179,16 @@ You can define a `decryptSecret` in each context to for example encrypt the prod
 The CLI provides multiple ways how to configure and manage your global secrets.
 ```bash
 # Generate via pwgen 
-git-secrets global-secret mySecret $(pwgen -c 32 -n -s -y)
+git secrets global-secret mySecret $(pwgen -c 32 -n -s -y)
 
 # Set manually
-git-secrets global-secret mySecret <my-secret-here>
+git secrets global-secret mySecret <my-secret-here>
 
 # Get the written secret
-git-secrets global-secret mySecret
+git secrets global-secret mySecret
 
 # Get all global secret names
-git-secrets global-secret
+git secrets global-secret
 ```
 
 #### Overwrite using CLI Args
@@ -189,7 +197,7 @@ In case you don't want to store the secrets globally and on the disk you can als
 
 ```bash
 # Uses the secret passed via --secret (insecure)
-git-secrets get secret mySecret --secret secretName=$(SECRET_VALUE) --secret secretName1=$(SECRET_VALUE_1)
+git secrets get secret mySecret --secret secretName=$(SECRET_VALUE) --secret secretName1=$(SECRET_VALUE_1)
 ```
 
 ### Context

@@ -29,7 +29,7 @@ git-secrets render <targetName> --dry-run --debug: Dry run render and shows the 
 git-secrets render <targetName> --debug: Render and write the rendering target
 `,
 	Args: func(cmd *cobra.Command, args []string) error {
-		if !(len(args) == 1 || len(args) == 2) {
+		if !(len(args) == 0 || len(args) == 1 || len(args) == 2) {
 			return fmt.Errorf("usage: git-secrets render <target> or git-secrets render <file-in> <file-out>")
 		}
 		return nil
@@ -43,7 +43,11 @@ git-secrets render <targetName> --debug: Render and write the rendering target
 		isDebug, _ := cmd.Flags().GetBool(FlagDebug)
 
 		var filesToRender []*config_generic.FileToRender
-		if len(args) == 1 {
+		if len(args) == 0 {
+			fmt.Println("Usage: git-secrets render <targetName1>,<targetName2>,...")
+			fmt.Println("Render using another context: git-secrets render <targetName> -c <contextName>")
+			cobra.CheckErr(fmt.Errorf("You must specify a rendering context. Available targets: %s", strings.Join(projectCfg.RenderTargetNames(), ", ")))
+		} else if len(args) == 1 {
 
 			nonUniqueTargets := strings.Split(args[0], ",")
 			uniqueTargets := make(map[string]bool)

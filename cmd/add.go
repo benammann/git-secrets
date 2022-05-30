@@ -31,6 +31,7 @@ var addContextCmd = &cobra.Command{
 		fmt.Printf("The context %s has been added to your config file\n", contextToAdd)
 		fmt.Printf("Now use it using the --context %s or -c %s flag\n", contextToAdd, contextToAdd)
 		fmt.Printf("Add a config to this context: git-secrets set config <configKey> <configValue> -c %s\n", contextToAdd)
+		fmt.Printf("Add a secret to this context: git-secrets set secret <secretKey> -c %s\n", contextToAdd)
 	},
 }
 
