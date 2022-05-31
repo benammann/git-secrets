@@ -32,7 +32,8 @@ var versionCmd = &cobra.Command{
 \    \_\  \  ||  |    /        \  ___/\  \___|  | \/\  ___/|  |  \___ \ 
  \______  /__||__|   /_______  /\___  >\___  >__|    \___  >__| /____  >
         \/                   \/     \/     \/            \/          \/`)
-		fmt.Println(version, commit, date)
+		fmt.Println("")
+		fmt.Println("https://github.com/benammann/git-secrets", "v"+version, "rev:"+commit, date)
 	},
 }
 

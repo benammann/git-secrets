@@ -25,11 +25,7 @@ Be aware that this project is still under development and the api may change.
 
 ### Demo
 
-#### Initialize a new project
-![](docs/git-secrets-init-demo.gif)
-
-#### Add a new context and secret
-![](docs/git-secrets-contexts-demo.gif)
+![](docs/git-secrets-demo.gif)
 
 ### Examples
 
