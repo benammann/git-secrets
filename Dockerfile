@@ -12,8 +12,16 @@ RUN go mod download
 # Copy the go source
 COPY . .
 
+ARG BUILD_VERSION="n/a"
+ARG BUILD_COMMIT="n/a"
+ARG BUILD_DATE="n/a"
+
+ENV BUILD_VERSION="$BUILD_VERSION"
+ENV BUILD_COMMIT="$BUILD_COMMIT"
+ENV BUILD_DATE="$BUILD_DATE"
+
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o git-secrets main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o git-secrets main.go -ldflags "-X main.version=$BUILD_VERSION -X main.commit=$BUILD_COMMIT -X main.date=$BUILD_DATE"
 
 FROM alpine:latest
 WORKDIR /git-secrets

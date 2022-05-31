@@ -28,16 +28,16 @@ jobs:
         run: echo "CR_TOKEN=$(docker run -v $PWD/.git-secrets.json:/git-secrets/.git-secrets.json "$IMAGE_NAME:latest" --secret gitsecretspublic=${GIT_SECRETS_PUBLIC_DEFAULT} get secret crToken)" >> $GITHUB_ENV
         env:
           GIT_SECRETS_PUBLIC_DEFAULT: ${{ secrets.GIT_SECRETS_PUBLIC_DEFAULT }}
-      - name: Docker login
-        run: echo $CR_TOKEN | docker login -u $CR_USER --password-stdin
-      - name: Docker Build
-        run: docker build --pull -t "$IMAGE_NAME:latest" .
-      - name: Docker Push (latest tag)
-        run: docker push "$IMAGE_NAME:latest"
       - name: Remove ref from tag
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Remove v from release version
         run: echo "IMAGE_TAG=${RELEASE_VERSION:1}" >> $GITHUB_ENV
+      - name: Docker login
+        run: echo $CR_TOKEN | docker login -u $CR_USER --password-stdin
+      - name: Docker Build
+        run: docker build --pull -t "$IMAGE_NAME:latest" . --build-arg BUILD_VERSION=$RELEASE_VERSION --build-arg BUILD_COMMIT=$GITHUB_SHA --build-arg DATE=$(date)
+      - name: Docker Push (latest tag)
+        run: docker push "$IMAGE_NAME:latest"
       - name: Docker Tag latest as build tag
         run: docker tag "$IMAGE_NAME:latest" "$IMAGE_NAME:$IMAGE_TAG"
       - name: Docker Push build tag

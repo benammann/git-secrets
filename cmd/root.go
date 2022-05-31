@@ -13,6 +13,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+var version string
+var commit string
+var date string
+
 var globalCfgFile string
 var projectCfgFile string
 var projectCfg *config_generic.Repository
@@ -50,7 +54,10 @@ var rootCmd = &cobra.Command{
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
+func Execute(buildVersion string, buildCommit string, buildDate string) {
+	version = buildVersion
+	commit = buildCommit
+	date = buildDate
 	cobra.CheckErr(rootCmd.Execute())
 }
 

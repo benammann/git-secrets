@@ -59,13 +59,16 @@ The configuration is made in a json file called `.git-secrets.json` you can also
 
 ```bash
 # Create a new global encoder secret (which you can later share with your team)
-git secrets global-secret mySecret --value $(pwgen -c 32 -n -s -y)
+git secrets set global-secret mySecret --value $(pwgen -c 32 -n -s -y)
 
 # Create a new .git-secrets.json
 git secrets init
 
 # Get the initial information of the config file
 git secrets info
+
+# Get the CLI's current version
+git secrets version
 ```
 
 ### Encode a secret and add a config entry
