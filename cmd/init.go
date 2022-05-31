@@ -90,8 +90,9 @@ git-secrets init
 
 		fmt.Println(questionResponse.OutputFile, "written")
 		fmt.Println("Info: git-secrets info -d")
-		fmt.Println("Add Context: git-secrets add-context <contextName>")
-		fmt.Println("Add Secret: git-secrets encode --write secretName")
+		fmt.Println("Add Context: git-secrets add context <contextName>")
+		fmt.Println("Set Config: git-secrets set config <configKey> <configValue>")
+		fmt.Println("Set Secret: git-secrets set secret <secretKey>")
 
 	},
 }
