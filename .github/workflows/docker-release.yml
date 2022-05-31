@@ -35,7 +35,7 @@ jobs:
       - name: Docker login
         run: echo $CR_TOKEN | docker login -u $CR_USER --password-stdin
       - name: Docker Build
-        run: docker build --pull -t "$IMAGE_NAME:latest" --build-arg BUILD_VERSION=$RELEASE_VERSION --build-arg BUILD_COMMIT=$GITHUB_SHA --build-arg DATE=$(date) .
+        run: DATE=$(date) docker build --pull -t "$IMAGE_NAME:latest" --build-arg BUILD_VERSION=$RELEASE_VERSION --build-arg BUILD_COMMIT=$GITHUB_SHA --build-arg DATE=$DATE .
       - name: Docker Push (latest tag)
         run: docker push "$IMAGE_NAME:latest"
       - name: Docker Tag latest as build tag
