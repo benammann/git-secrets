@@ -25,7 +25,7 @@ Be aware that this project is still under development and the api may change.
 
 ### Demo
 
-![](docs/git-secrets-demo.gif)
+![](docs/img/git-secrets-demo.gif)
 
 ### Examples
 
