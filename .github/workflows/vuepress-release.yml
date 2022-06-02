@@ -1,39 +1,16 @@
-name: Update Github pages
-
-#on:
-#  push:
-#    tags:
-#      - 'v[0-9]+.[0-9]+.[0-9]+'
+name: Build and Deploy
 on: [push]
-
-permissions:
-  contents: write
-
 jobs:
-  releasevuepress:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - name: Install Dependencies
-        run: npm install
-      - name: Build Vuepress
-        run: npm run docs:build
-      - name: Setup Access Token
-        run: echo "GH_PAGES_ACCESS_TOKEN=$HOMEBREW_TAP_GITHUB_TOKEN" >> $GITHUB_ENV
+        uses: actions/checkout@master
+      - name: vuepress-deploy
+        uses: jenkey2011/vuepress-deploy@master
         env:
-          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
-      - name: Clone benammann.github.io
-        run: git clone https://benammann:$GH_PAGES_ACCESS_TOKEN@github.com/benammann/benammann.github.io gh-pages
-      - name: Create latest folder if not exists
-        run: mkdir -p gh-pages/git-secrets/latest
-      - name: Copy dist into latest folder
-        run: cp -R docs/.vuepress/dist/* gh-pages/git-secrets/latest/.
-      - name: Commit changes
-        run: cd gh-pages && git config user.name "Github Actions" && git config user.email "noreply@github.com" && git add . && git commit -m 'updates vuepress' && git push
+          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_REPO: benammann/git-secrets
+          TARGET_BRANCH: gh-pages
+          BUILD_SCRIPT: npm install && npm run docs:build
+          BUILD_DIR: docs/.vuepress/dist
