@@ -1,0 +1,39 @@
+name: Release docker image
+
+#on:
+#  push:
+#    tags:
+#      - 'v[0-9]+.[0-9]+.[0-9]+'
+on: [push]
+
+permissions:
+  contents: write
+
+jobs:
+  releasedocker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install Dependencies
+        run: npm install
+      - name: Build Vuepress
+        run: npm run docs:build
+      - name: Setup Access Token
+        run: echo "GH_PAGES_ACCESS_TOKEN=$HOMEBREW_TAP_GITHUB_TOKEN" >> $GITHUB_ENV
+        env:
+          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+      - name: Clone benammann.github.io
+        run: git clone https://benammann:$GH_PAGES_ACCESS_TOKEN@github.com/benammann/benammann.github.io gh-pages
+      - name: Create latest folder if not exists
+        run: mkdir -p gh-pages/git-secrets/latest
+      - name: Copy dist into latest folder
+        run: cp -R docs/.vuepress/dist/* gh-pages/git-secrets/latest/.
+      - name: Commit changes
+        run: cd gh-pages && git commit -am 'updates vuepress' && git push

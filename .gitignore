@@ -3,3 +3,8 @@ example/.env
 example/k8s-prod-secret.yaml
 .idea
 dist/
+
+# Vuepress
+node_modules
+.temp
+.cache
