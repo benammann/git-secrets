@@ -2,9 +2,9 @@ package render
 
 import (
 	"encoding/base64"
-	"fmt"
 	"github.com/tcnksm/go-gitconfig"
 	"html/template"
+	"log"
 )
 
 // getTemplateFunctions are added to the template and can be executed
@@ -21,10 +21,11 @@ func templateFunctionBase64Encode(args ...interface{}) string {
 	return base64.StdEncoding.EncodeToString([]byte(args[0].(string)))
 }
 
-func templateFunctionGitConfig(args ...interface{}) string {
+// templateFunctionGitConfig allows reading values from git
+func templateFunctionGitConfig(args ...interface{}) interface{} {
 	val, err := gitconfig.Local(args[0].(string))
 	if err != nil {
-		return fmt.Sprintf("error: %s", err.Error())
+		 log.Fatal(err.Error())
 	}
 	return val
 }
