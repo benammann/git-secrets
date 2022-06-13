@@ -25,7 +25,11 @@ func templateFunctionBase64Encode(args ...interface{}) string {
 func templateFunctionGitConfig(args ...interface{}) interface{} {
 	val, err := gitconfig.Local(args[0].(string))
 	if err != nil {
-		 log.Fatal(err.Error())
+		globalVal, errGlobal := gitconfig.Global(args[0].(string))
+		if errGlobal != nil {
+			log.Fatalf("the key %s does not exist locally or globally", args[0].(string))
+		}
+		return globalVal
 	}
 	return val
 }
