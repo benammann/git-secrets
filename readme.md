@@ -8,11 +8,7 @@
 ![Test Badge](https://github.com/benammann/git-secrets/actions/workflows/docker-release.yml/badge.svg)
 ![License](https://img.shields.io/github/license/benammann/git-secrets?123)
 
-Git-Secrets allows you to add encrypted values to your git repository and decode them locally. The encrypted version is left in the upstream, the decoded version kept locally.
-
-The main benefit is that you can render templates using the decoded values like `.env` file or event kubernetes deployment files. More details: https://github.com/benammann/git-secrets/tree/dev-beta/examples
-
-Be aware that this project is still under development and the api may change.
+Git Secrets encrypts your passwords and configurations for multiple environments and allows you to check them into a git repository. Using the GoLang templating engine, you can then decrypt them and write them to env files or Kubernetes deployment files.
 
 ### How does it work
 
@@ -198,11 +194,3 @@ In case you don't want to store the secrets globally and on the disk you can als
 # Uses the secret passed via --secret (insecure)
 git secrets get secret mySecret --secret secretName=$(SECRET_VALUE) --secret secretName1=$(SECRET_VALUE_1)
 ```
-
-### Context
-
-### Secrets
-
-### Configs
-
-### File rendering
