@@ -17,7 +17,7 @@
 ![Docker Image Version](https://img.shields.io/docker/v/benammann/git-secrets?label=docker%20image%20tag)
 ![Release Badge](https://github.com/benammann/git-secrets/actions/workflows/brew-release.yml/badge.svg)
 ![Test Badge](https://github.com/benammann/git-secrets/actions/workflows/docker-release.yml/badge.svg)
-![License](https://img.shields.io/github/license/benammann/git-secrets)
+![License](https://img.shields.io/github/license/benammann/git-secrets?123)
 
 Git Secrets encrypts your passwords and configurations for multiple environments and allows you to check them into a git repository. Using the GoLang templating engine, you can then decrypt them and write them to env files or Kubernetes deployment files.
 
@@ -125,8 +125,44 @@ git secrets add file .env.dist .env -t env
 # targetName: env
 git secrets render env
 
+# prints all available variables
+git secrets render env --debug
+
+# prints the rendered files to the console without actually writing the file
+git secrets render env --dry-run
+
 # renders the files using the prod context
 git secrets render env -c prod
+````
+
+
+### Custom Template Functions
+
+Git Secrets extends the GoLang Templating engine by some useful functions
+
+#### Base64Encode
+
+The Base64Encode function takes the first argument and encodes it as Base64. This allows you to render Kubernetes Secrets
+
+````yaml
+# Created by git-secrets
+apiVersion: v1
+data:
+  apiPassword: "{{ Base64Encode .Secrets.applicationAPassword }}"
+kind: Secret
+metadata:
+  name: api-application-a
+  namespace: {{.Configs.namespace}}
+type: Opaque
+````
+
+#### GitConfig
+
+GitConfig allows you to resolve git config values. For example if you want to render files individually to the developer
+
+````text
+GIT_NAME={{GitConfig "user.name"}}
+GIT_EMAIL={{GitConfig "user.email"}}
 ````
 
 
