@@ -2,13 +2,16 @@ package render
 
 import (
 	"encoding/base64"
+	"github.com/tcnksm/go-gitconfig"
 	"html/template"
+	"log"
 )
 
 // getTemplateFunctions are added to the template and can be executed
 func getTemplateFunctions() template.FuncMap {
 	return template.FuncMap{
 		"Base64Encode": templateFunctionBase64Encode,
+		"GitConfig": templateFunctionGitConfig,
 	}
 }
 
@@ -16,6 +19,19 @@ func getTemplateFunctions() template.FuncMap {
 // should be used for kubernetes secrets
 func templateFunctionBase64Encode(args ...interface{}) string {
 	return base64.StdEncoding.EncodeToString([]byte(args[0].(string)))
+}
+
+// templateFunctionGitConfig allows reading values from git
+func templateFunctionGitConfig(args ...interface{}) interface{} {
+	val, err := gitconfig.Local(args[0].(string))
+	if err != nil {
+		globalVal, errGlobal := gitconfig.Global(args[0].(string))
+		if errGlobal != nil {
+			log.Fatalf("the key %s does not exist locally or globally", args[0].(string))
+		}
+		return globalVal
+	}
+	return val
 }
 
 // createNewTemplate creates a new template engine with all the extensions based on the file name
