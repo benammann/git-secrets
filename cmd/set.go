@@ -81,6 +81,7 @@ func init() {
 	for _, cmd := range []*cobra.Command{setConfigCmd, setSecretCmd} {
 		cmd.Flags().Bool(FlagForce, false, "use --force to overwrite an existing value")
 	}
+	setSecretCmd.Flags().String(FlagValue, "", "--value <secretValue>: This is insecure, use --value $ENV_VALUE to not write the secret value to the history file.")
 	rootCmd.AddCommand(setCmd)
 	setCmd.AddCommand(setConfigCmd)
 	setCmd.AddCommand(setSecretCmd)
