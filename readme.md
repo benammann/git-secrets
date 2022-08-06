@@ -1,8 +1,8 @@
 ## encryption and rendering engine for git repositories
 
-![Tag](https://img.shields.io/github/v/release/benammann/git-secrets?label=brew%20tag)
-![Docker Image Version](https://img.shields.io/docker/v/benammann/git-secrets?label=docker%20image%20tag)
-![Release Badge](https://github.com/benammann/git-secrets/actions/workflows/brew-release.yml/badge.svg)
+![Tag](https://img.shields.io/github/v/release/benammann/git-secrets?label=release)
+![Docker Image Version](https://img.shields.io/docker/v/benammann/git-secrets?label=image)
+![Release Badge](https://github.com/benammann/git-secrets/actions/workflows/goreleaser.yml/badge.svg)
 ![Test Badge](https://github.com/benammann/git-secrets/actions/workflows/docker-release.yml/badge.svg)
 ![License](https://img.shields.io/github/license/benammann/git-secrets?123)
 
