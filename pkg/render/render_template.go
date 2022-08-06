@@ -11,7 +11,7 @@ import (
 func getTemplateFunctions() template.FuncMap {
 	return template.FuncMap{
 		"Base64Encode": templateFunctionBase64Encode,
-		"GitConfig": templateFunctionGitConfig,
+		"GitConfig":    templateFunctionGitConfig,
 	}
 }
 

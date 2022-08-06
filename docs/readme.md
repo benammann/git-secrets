@@ -1,19 +1,8 @@
-# Git-Secrets
-
-````text
-  ________.__  __      _________                            __
- /  _____/|__|/  |_   /   _____/ ____   ___________   _____/  |_  ______
-/   \  ___|  \   __\  \_____  \_/ __ \_/ ___\_  __ \_/ __ \   __\/  ___/
-\    \_\  \  ||  |    /        \  ___/\  \___|  | \/\  ___/|  |  \___ \
- \______  /__||__|   /_______  /\___  >\___  >__|    \___  >__| /____  >
-        \/                   \/     \/     \/            \/          \/
-````
-
 ## encryption and rendering engine for git repositories
 
-![Tag](https://img.shields.io/github/v/release/benammann/git-secrets?label=brew%20tag)
-![Docker Image Version](https://img.shields.io/docker/v/benammann/git-secrets?label=docker%20image%20tag)
-![Release Badge](https://github.com/benammann/git-secrets/actions/workflows/brew-release.yml/badge.svg)
+![Tag](https://img.shields.io/github/v/release/benammann/git-secrets?label=release)
+![Docker Image Version](https://img.shields.io/docker/v/benammann/git-secrets?label=image)
+![Release Badge](https://github.com/benammann/git-secrets/actions/workflows/goreleaser.yml/badge.svg)
 ![Test Badge](https://github.com/benammann/git-secrets/actions/workflows/docker-release.yml/badge.svg)
 ![License](https://img.shields.io/github/license/benammann/git-secrets?123)
 
@@ -30,7 +19,7 @@ Git Secrets encrypts your passwords and configurations for multiple environments
 
 ### Demo
 
-![](../docs/img/git-secrets-demo.gif)
+![](img/git-secrets-demo.gif)
 
 ### Examples
 
@@ -38,20 +27,36 @@ Git Secrets encrypts your passwords and configurations for multiple environments
 - Kubernetes Secrets: [render-kubernetes-secret](examples/render-kubernetes-secret)
 - Github Actions [.github/workflows/docker-release.yml](.github/workflows/docker-release.yml)
 
+
 ### Installation
 
-via Homebrew / Linuxbrew
-```
-brew install benammann/tap/git-secrets 
-```
+`Git-Secrets` is available on Linux, macOS and Windows platforms.
 
-via Docker
+* Binaries for Linux, Windows and Mac are available as tarballs in the [release](https://github.com/benammann/git-secrets/releases) page.
 
-````bash
-docker run benammann/git-secrets info
-````
 
-or just head over to the [Releases](https://github.com/benammann/git-secrets/releases) page and download the prebuilt binary manually
+* Via Curl for Linux and Mac (uses https://github.com/jpillora/installer)
+
+  ```shell
+  # without sudo
+  curl https://i.jpillora.com/benammann/git-secrets! | bash
+  
+  # using sudo (if mv fails)
+  curl https://i.jpillora.com/benammann/git-secrets!! | bash
+  ```
+
+* Via Homebrew for macOS or LinuxBrew for Linux
+
+   ```shell
+   brew install benammann/tap/git-secrets 
+   ```
+
+* Via a GO install
+
+  ```shell
+  # NOTE: The dev version will be in effect!
+  go install github.com/benammann/git-secrets@latest
+  ```
 
 ## Getting started
 
@@ -132,6 +137,24 @@ git secrets render env --dry-run
 # renders the files using the prod context
 git secrets render env -c prod
 ````
+
+### Scan for plain secrets
+
+`Git-Secrets` provides a simple command to scan for plain secrets in the project files.
+
+![](img/git-secrets-scan-demo.png)
+
+````bash
+# scan all files added to git
+git secrets scan -a
+
+# scan staged files only
+git secrets scan
+
+# hint: add -v to show all the scanned file names
+````
+
+You should use this command to setup a pre-commit git-hook in your project. You can use Husky (https://typicode.github.io/husky/#/) to automatically install and setup the hook.
 
 
 ### Custom Template Functions
