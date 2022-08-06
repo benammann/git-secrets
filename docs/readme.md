@@ -19,7 +19,7 @@ Git Secrets encrypts your passwords and configurations for multiple environments
 
 ### Demo
 
-![](img/git-secrets-demo.gif)
+![](./img/git-secrets-demo.gif)
 
 ### Examples
 
@@ -142,7 +142,7 @@ git secrets render env -c prod
 
 `Git-Secrets` provides a simple command to scan for plain secrets in the project files.
 
-![](img/git-secrets-scan-demo.png)
+![](./img/git-secrets-scan-demo.png)
 
 ````bash
 # scan all files added to git
