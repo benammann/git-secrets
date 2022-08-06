@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "prepare": "husky install",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs"
   },
@@ -11,5 +12,8 @@
   "license": "MIT",
   "dependencies": {
     "vuepress": "^2.0.0-beta.46"
+  },
+  "devDependencies": {
+    "husky": "^8.0.1"
   }
 }

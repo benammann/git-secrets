@@ -138,6 +138,24 @@ git secrets render env --dry-run
 git secrets render env -c prod
 ````
 
+### Scan for plain secrets
+
+`Git-Secrets` provides a simple command to scan for plain secrets in the project files.
+
+![](docs/img/git-secrets-scan-demo.png)
+
+````bash
+# scan all files added to git
+git secrets scan -a
+
+# scan staged files only
+git secrets scan
+
+# hint: add -v to show all the scanned file names
+````
+
+You should use this command to setup a pre-commit git-hook in your project. You can use Husky (https://typicode.github.io/husky/#/) to automatically install and setup the hook.
+
 
 ### Custom Template Functions
 

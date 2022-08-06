@@ -66,7 +66,8 @@ var scanCmd = &cobra.Command{
 			for _, secret := range contextSecrets {
 				decodedValue, errDecode := secret.Decode()
 				if errDecode != nil {
-					cobra.CheckErr(fmt.Errorf("Could not decode %s: %s\n", secret.Name, errDecode.Error()))
+					color.Yellow("Warning: could not decode secret %s from context %s, skipping this secret\n", secret.Name, secret.OriginContext.Name)
+					continue
 				}
 				decodedSecrets = append(decodedSecrets, &DecodedSecret{secret: secret, decodedValue: decodedValue})
 			}
