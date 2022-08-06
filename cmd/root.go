@@ -33,6 +33,8 @@ const FlagForce = "force"
 const FlagDebug = "debug"
 const FlagDryRun = "dry-run"
 const FlagTarget = "target"
+const FlagAll = "all"
+const FlagVerbose = "verbose"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
