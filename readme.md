@@ -48,7 +48,7 @@ Git Secrets encrypts your passwords and configurations for multiple environments
 * Via Homebrew for macOS or LinuxBrew for Linux
 
    ```shell
-   brew install k9s
+   brew install benammann/tap/git-secrets 
    ```
 
 * Via a GO install
