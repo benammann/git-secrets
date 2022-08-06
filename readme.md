@@ -185,7 +185,23 @@ GitConfig allows you to resolve git config values. For example if you want to re
 GIT_NAME={{GitConfig "user.name"}}
 GIT_EMAIL={{GitConfig "user.email"}}
 ````
+### Using Github-Actions
 
+There is a github-action available to easily decode secrets in your CI/CD Pipeline: https://github.com/marketplace/actions/decrypt-secret
+
+Example Usage
+
+````yaml
+- name: Decrypt Secret Value
+  id: test_secret
+  uses: benammann/git-secrets-get-secret-action@v1
+  with:
+    name: testSecret
+    decryptSecretName: getsecretactionpublic
+    decryptSecretValue: ${{ secrets.GET_SECRET_ACTION_PUBLIC_SECRET }}
+- name: Echo the output
+  run: echo "${{ steps.test_secret.outputs.value }}"
+````
 
 ### Using Docker
 

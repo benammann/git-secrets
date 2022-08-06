@@ -21,19 +21,26 @@ jobs:
       - name: Set image name
         run: echo "IMAGE_NAME="benammann/git-secrets"" >> $GITHUB_ENV
       - name: Set docker username
-        run: echo "CR_USER=$(docker run -v $PWD/.git-secrets.json:/git-secrets/.git-secrets.json "$IMAGE_NAME:latest" --secret gitsecretspublic=${GIT_SECRETS_PUBLIC_DEFAULT} get config crUser)" >> $GITHUB_ENV
-        env:
-          GIT_SECRETS_PUBLIC_DEFAULT: ${{ secrets.GIT_SECRETS_PUBLIC_DEFAULT }}
+        uses: benammann/git-secrets-get-secret-action@v1
+        id: docker_username
+        with:
+          resource: config
+          name: crUser
+          decryptSecretName: gitsecretspublic
+          decryptSecretValue: ${{ secrets.GIT_SECRETS_PUBLIC_DEFAULT }}
       - name: Set docker token
-        run: echo "CR_TOKEN=$(docker run -v $PWD/.git-secrets.json:/git-secrets/.git-secrets.json "$IMAGE_NAME:latest" --secret gitsecretspublic=${GIT_SECRETS_PUBLIC_DEFAULT} get secret crToken)" >> $GITHUB_ENV
-        env:
-          GIT_SECRETS_PUBLIC_DEFAULT: ${{ secrets.GIT_SECRETS_PUBLIC_DEFAULT }}
+        uses: benammann/git-secrets-get-secret-action@v1
+        id: docker_token
+        with:
+          name: crToken
+          decryptSecretName: gitsecretspublic
+          decryptSecretValue: ${{ secrets.GIT_SECRETS_PUBLIC_DEFAULT }}
       - name: Remove ref from tag
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Remove v from release version
         run: echo "IMAGE_TAG=${RELEASE_VERSION:1}" >> $GITHUB_ENV
       - name: Docker login
-        run: echo $CR_TOKEN | docker login -u $CR_USER --password-stdin
+        run: echo ${{ steps.docker_token.outputs.value }} | docker login -u ${{ steps.docker_username.outputs.value }} --password-stdin
       - name: Docker Build
         run: DATE=$(date) docker build --pull -t "$IMAGE_NAME:latest" --build-arg BUILD_VERSION=$RELEASE_VERSION --build-arg BUILD_COMMIT=$GITHUB_SHA --build-arg DATE=$DATE .
       - name: Docker Push (latest tag)
