@@ -27,20 +27,36 @@ Git Secrets encrypts your passwords and configurations for multiple environments
 - Kubernetes Secrets: [render-kubernetes-secret](examples/render-kubernetes-secret)
 - Github Actions [.github/workflows/docker-release.yml](.github/workflows/docker-release.yml)
 
+
 ### Installation
 
-via Homebrew / Linuxbrew
-```
-brew install benammann/tap/git-secrets 
-```
+`Git-Secrets` is available on Linux, macOS and Windows platforms.
 
-via Docker
+* Binaries for Linux, Windows and Mac are available as tarballs in the [release](https://github.com/benammann/git-secrets/releases) page.
 
-````bash
-docker run benammann/git-secrets info
-````
 
-or just head over to the [Releases](https://github.com/benammann/git-secrets/releases) page and download the prebuilt binary manually
+* Via Curl for Linux and Mac (uses https://github.com/jpillora/installer)
+
+  ```shell
+  # without sudo
+  curl https://i.jpillora.com/benammann/git-secrets! | bash
+  
+  # using sudo (if mv fails)
+  curl https://i.jpillora.com/benammann/git-secrets!! | bash
+  ```
+
+* Via Homebrew for macOS or LinuxBrew for Linux
+
+   ```shell
+   brew install k9s
+   ```
+
+* Via a GO install
+
+  ```shell
+  # NOTE: The dev version will be in effect!
+  go install github.com/benammann/git-secrets@latest
+  ```
 
 ## Getting started
 
