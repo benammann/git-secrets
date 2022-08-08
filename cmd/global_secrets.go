@@ -97,8 +97,8 @@ func init() {
 	getCmd.AddCommand(getGlobalSecretsCmd)
 	setCmd.AddCommand(setGlobalSecretsCmd)
 
-	setGlobalSecretsCmd.Flags().Bool(FlagForce, false, "allows to overwrite secrets")
-	setGlobalSecretsCmd.Flags().String(FlagValue, "", "allows to pass the secret to write using a parameter")
+	setGlobalSecretsCmd.Flags().Bool(FlagForce, false, "Force overwrite existing secret: You may loose your master password!")
+	setGlobalSecretsCmd.Flags().String(FlagValue, "", "Pass the secret's value as parameter instead of password input")
 
 	// Here you will define your flags and configuration settings.
 

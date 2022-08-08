@@ -6,7 +6,11 @@
 <img src="https://github.com/benammann/git-secrets/actions/workflows/goreleaser.yml/badge.svg" />
 <img src="https://github.com/benammann/git-secrets/actions/workflows/docker-release.yml/badge.svg" />
 <img src="https://img.shields.io/github/license/benammann/git-secrets" />
+<br/>
+<br/>
 </div>
+
+
 
 * [Features](#features)
 * [How does it work](#how-does-it-work)

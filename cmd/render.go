@@ -67,7 +67,8 @@ git-secrets render <targetName> --debug: Render and write the rendering target
 			}
 
 			if len(filesToRender) == 0 {
-				cobra.CheckErr(fmt.Errorf("could not resolve any files to render. Use --file-in to render a custom file using this context"))
+				fmt.Println("could not resolve any files to render. Use git secrets render <fileIn> <fileOut> -c <contextName> to render a file manually")
+				cobra.CheckErr(fmt.Errorf("you can also add a file using git secrets add file <fileIn> <fileOut> -t <renderTarget>"))
 			}
 
 		} else {

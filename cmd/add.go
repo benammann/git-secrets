@@ -64,5 +64,5 @@ func init() {
 	rootCmd.AddCommand(addCmd)
 	addCmd.AddCommand(addContextCmd)
 	addCmd.AddCommand(addFileCmd)
-	addFileCmd.Flags().StringP(FlagTarget, "t", "", "sets the target: --target <targetName>")
+	addFileCmd.Flags().StringP(FlagTarget, "t", "", "Specifies the render target name: -t <targetName>, example -t k8s")
 }

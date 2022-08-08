@@ -35,7 +35,7 @@ git-secrets init
 		}
 
 		if len(secretKeys) < 0 {
-			cobra.CheckErr(fmt.Errorf("please create a global secret before: git-secrets global-secrets <secret-name> <secret-value>"))
+			cobra.CheckErr(fmt.Errorf("please create a global secret before: git secrets set global-secret <secret-name>"))
 		}
 
 		var outputFileQuestions = []*survey.Question{

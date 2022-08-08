@@ -171,8 +171,8 @@ var scanCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(scanCmd)
-	scanCmd.Flags().BoolP(FlagAll, "a", false, "--all or -a: scan all files that are contained in the git repo")
-	scanCmd.Flags().BoolP(FlagVerbose, "v", false, "--verbose or -v: list the scanned files")
+	scanCmd.Flags().BoolP(FlagAll, "a", false, "Scan all files that are contained in the git repo")
+	scanCmd.Flags().BoolP(FlagVerbose, "v", false, "List the scanned files")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
