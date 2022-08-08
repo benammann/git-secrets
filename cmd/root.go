@@ -35,6 +35,7 @@ const FlagDryRun = "dry-run"
 const FlagTarget = "target"
 const FlagAll = "all"
 const FlagVerbose = "verbose"
+const FlagShort = "short"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -70,13 +71,14 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 	// will be global for your application.
-	rootCmd.PersistentFlags().StringVar(&globalCfgFile, "global-config", "", "global config file (default is $HOME/.git-secrets.yaml)")
-	rootCmd.PersistentFlags().StringVarP(&projectCfgFile, "project-config", "f", ".git-secrets.json", "project config file (default is .git-secrets.json)")
-	rootCmd.PersistentFlags().StringVarP(&contextName, "context-name", "c", "", "context name (default is 'default')")
-	rootCmd.PersistentFlags().StringArrayVar(&overwrittenSecrets, "secret", []string{}, "--secret secretA=$(SECRET_A_VALUE) --secret secretB=$(SECRET_B_VALUE): Pass 1-n secret names. Make sure to use environment variables to fill them!")
+	rootCmd.PersistentFlags().StringVar(&globalCfgFile, "global-config", "", "Path to the global config file: ~/.git-secrets.yaml")
+	rootCmd.PersistentFlags().StringVarP(&projectCfgFile, "config", "f", ".git-secrets.json", "Path to the projects config file: .git-secrets.json")
+	rootCmd.PersistentFlags().StringVarP(&contextName, "context", "c", "", "Which context to use: default")
+	rootCmd.PersistentFlags().StringArrayVar(&overwrittenSecrets, "secret", []string{}, "Pass global secrets directly: --secret secretKey=secretValue")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	rootCmd.CompletionOptions.HiddenDefaultCmd = true
 }
 
 // initGlobalConfig reads in config file and ENV variables if set.

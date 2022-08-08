@@ -8,7 +8,7 @@ import (
 // addCmd represents the add command
 var addCmd = &cobra.Command{
 	Use:   "add",
-	Short: "allows you to set resources in your projects or global config file",
+	Short: "Add resources like context or file",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -17,7 +17,7 @@ var addCmd = &cobra.Command{
 // addContextCmd represents the addContext command
 var addContextCmd = &cobra.Command{
 	Use:     "context",
-	Short:   "adds a context to the existing config file",
+	Short:   "Add a context to the config file",
 	Example: "git-secrets add context <contextName>",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		cobra.CheckErr(projectCfgError)
@@ -38,7 +38,7 @@ var addContextCmd = &cobra.Command{
 // addFileCmd represents the addFile command
 var addFileCmd = &cobra.Command{
 	Use:   "file",
-	Short: "adds a file to render to the git-secrets file",
+	Short: "Add a file to the rendering engine",
 	Example: `
 git-secrets add file <fileIn> <fileOut>
 git-secrets add file <fileIn> <fileOut> -c prod
@@ -64,5 +64,5 @@ func init() {
 	rootCmd.AddCommand(addCmd)
 	addCmd.AddCommand(addContextCmd)
 	addCmd.AddCommand(addFileCmd)
-	addFileCmd.Flags().StringP(FlagTarget, "t", "", "sets the target: --target <targetName>")
+	addFileCmd.Flags().StringP(FlagTarget, "t", "", "Specifies the render target name: -t <targetName>, example -t k8s")
 }

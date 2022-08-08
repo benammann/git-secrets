@@ -18,7 +18,7 @@ type RenderFileData struct {
 // renderCmd represents the render command
 var renderCmd = &cobra.Command{
 	Use:   "render",
-	Short: "render files feature",
+	Short: "Render files using the go templating engine",
 	Example: `
 git-secrets render <targetName>: Render from configuration
 git-secrets render <targetName1>,<targetName2>,...: Renders multiple targets at once
@@ -67,7 +67,8 @@ git-secrets render <targetName> --debug: Render and write the rendering target
 			}
 
 			if len(filesToRender) == 0 {
-				cobra.CheckErr(fmt.Errorf("could not resolve any files to render. Use --file-in to render a custom file using this context"))
+				fmt.Println("could not resolve any files to render. Use git secrets render <fileIn> <fileOut> -c <contextName> to render a file manually")
+				cobra.CheckErr(fmt.Errorf("you can also add a file using git secrets add file <fileIn> <fileOut> -t <renderTarget>"))
 			}
 
 		} else {

@@ -1,18 +1,3 @@
-/*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
@@ -29,7 +14,7 @@ import (
 // getGlobalSecretsCmd represents the globalSecrets command
 var getGlobalSecretsCmd = &cobra.Command{
 	Use:   "global-secret",
-	Short: "allows to get the global secrets from ~/.git-secrets.yaml using the cli",
+	Short: "Get or list a secret from the global configuration",
 	Example: `
 git-secrets get global-secrets: get all global secret keys
 git-secrets get global-secret <secretKey>: prints the global secret value
@@ -63,7 +48,7 @@ git-secrets get global-secret <secretKey>: prints the global secret value
 // setGlobalSecretsCmd represents the globalSecrets command
 var setGlobalSecretsCmd = &cobra.Command{
 	Use:   "global-secret",
-	Short: "allows to set the global secrets from ~/.git-secrets.yaml using the cli",
+	Short: "Write a secret to the global configuration",
 	Example: `
 git-secrets set global-secret <secretKey>: sets the global secret from terminal input
 git-secrets set global-secret <secretKey> --value $MY_SECRET_VALUE_STORED_IN_ENV: sets the global secret value from --value parameter (insecure)
@@ -112,8 +97,8 @@ func init() {
 	getCmd.AddCommand(getGlobalSecretsCmd)
 	setCmd.AddCommand(setGlobalSecretsCmd)
 
-	setGlobalSecretsCmd.Flags().Bool(FlagForce, false, "allows to overwrite secrets")
-	setGlobalSecretsCmd.Flags().String(FlagValue, "", "allows to pass the secret to write using a parameter")
+	setGlobalSecretsCmd.Flags().Bool(FlagForce, false, "Force overwrite existing secret: You may loose your master password!")
+	setGlobalSecretsCmd.Flags().String(FlagValue, "", "Pass the secret's value as parameter instead of password input")
 
 	// Here you will define your flags and configuration settings.
 

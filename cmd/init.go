@@ -15,7 +15,7 @@ import (
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "initializes a new git-secrets project",
+	Short: "Initializes a new .git-secrets.json Project",
 	Example: `
 git-secrets init
 `,
@@ -35,7 +35,7 @@ git-secrets init
 		}
 
 		if len(secretKeys) < 0 {
-			cobra.CheckErr(fmt.Errorf("please create a global secret before: git-secrets global-secrets <secret-name> <secret-value>"))
+			cobra.CheckErr(fmt.Errorf("please create a global secret before: git secrets set global-secret <secret-name>"))
 		}
 
 		var outputFileQuestions = []*survey.Question{
