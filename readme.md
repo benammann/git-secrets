@@ -1,12 +1,42 @@
-## encryption and rendering engine for git repositories
+<div align="center">
+<h2>Git Secrets</h2>
+<p>a cli tool to manage configurations and secrets across multiple environments all stored inside your repository.<br />git secrets is built to automate local tasks like setting up the project or deploying secrets manually.</p>
+<img src="https://img.shields.io/github/v/release/benammann/git-secrets" />
+<img src="https://img.shields.io/docker/v/benammann/git-secrets?label=image" />
+<img src="https://github.com/benammann/git-secrets/actions/workflows/goreleaser.yml/badge.svg" />
+<img src="https://github.com/benammann/git-secrets/actions/workflows/docker-release.yml/badge.svg" />
+<img src="https://img.shields.io/github/license/benammann/git-secrets" />
+</div>
 
-![Tag](https://img.shields.io/github/v/release/benammann/git-secrets?label=release)
-![Docker Image Version](https://img.shields.io/docker/v/benammann/git-secrets?label=image)
-![Release Badge](https://github.com/benammann/git-secrets/actions/workflows/goreleaser.yml/badge.svg)
-![Test Badge](https://github.com/benammann/git-secrets/actions/workflows/docker-release.yml/badge.svg)
-![License](https://img.shields.io/github/license/benammann/git-secrets?123)
+* [Features](#features)
+* [How does it work](#how-does-it-work)
+* [Demo](#demo)
+* [Examples](#examples)
+* [Installation](#installation)
+- [Getting started](#getting-started)
+  * [Initialize the project](#initialize-the-project)
+  * [Encode a secret and add a config entry](#encode-a-secret-and-add-a-config-entry)
+  * [Decode the secrets and get the config entry](#decode-the-secrets-and-get-the-config-entry)
+  * [Create a `.env.dist` file](#create-a--envdist--file)
+  * [Scan for plain secrets](#scan-for-plain-secrets)
+  * [Custom Template Functions](#custom-template-functions)
+    + [Base64Encode](#base64encode)
+    + [GitConfig](#gitconfig)
+  * [Using Github-Actions](#using-github-actions)
+  * [Using Docker](#using-docker)
+- [Documentation](#documentation)
+  * [How the encryption is done](#how-the-encryption-is-done)
+    + [Named Secrets](#named-secrets)
+    + [Overwrite using CLI Args](#overwrite-using-cli-args)
+* [License](#license)
 
-Git Secrets encrypts your passwords and configurations for multiple environments and allows you to check them into a git repository. Using the GoLang templating engine, you can then decrypt them and write them to env files or Kubernetes deployment files.
+### Features
+- Store secrets and configurations all in one place in your git repository
+- Render secrets and configurations to custom files (like .env, config or k8s files) using the go templating language (just like helm)
+- Manage multiple environments and inherit values from a default environment
+- Automatically scan your repository for leaked passwords using a git hook
+- Automatic configuration initialization and management using the CLI
+- Built for CI/CD (Docker / Github Actions)
 
 ### How does it work
 
@@ -278,3 +308,7 @@ In case you don't want to store the secrets globally and on the disk you can als
 # Uses the secret passed via --secret (insecure)
 git secrets get secret mySecret --secret secretName=$(SECRET_VALUE) --secret secretName1=$(SECRET_VALUE_1)
 ```
+
+# License
+
+The scripts and documentation in this project are released under the [MIT License](LICENSE)
