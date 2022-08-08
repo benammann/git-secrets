@@ -15,7 +15,7 @@ import (
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "initializes a new git-secrets project",
+	Short: "Initializes a new .git-secrets.json Project",
 	Example: `
 git-secrets init
 `,

@@ -9,7 +9,7 @@ import (
 // setCmd represents the set command
 var setCmd = &cobra.Command{
 	Use:   "set",
-	Short: "allows you to set resources in your projects or global config file",
+	Short: "Set resources like config, secret or global-secret",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -18,7 +18,7 @@ var setCmd = &cobra.Command{
 // setConfigCmd represents the setConfig command
 var setConfigCmd = &cobra.Command{
 	Use:   "config",
-	Short: "adds a config entry to the git-secrets file",
+	Short: "Set a config entry",
 	Example: `
 git-secrets set config <configKey> <configValue>
 git-secrets set config <configKey> <configValue> -c prod
@@ -41,7 +41,7 @@ git-secrets set config <configKey> <configValue> -c prod
 // setSecretCmd represents the setSecret command
 var setSecretCmd = &cobra.Command{
 	Use:   "secret",
-	Short: "encodes a secret and sets it in the git-secrets file",
+	Short: "Encode and write a secret to the config file",
 	Example: `
 git-secrets set secret <secretKey>: Encodes the secret using interactive ui and adds it to the git-secrets file
 git-secrets set secret <secretKey> --value <plainValue>: INSECURE: Uses the value directly from the --value parameter

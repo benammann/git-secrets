@@ -14,7 +14,7 @@ const InfoCmdFlagDecode = "decode"
 // infoCmd represents the info command
 var infoCmd = &cobra.Command{
 	Use:   "info",
-	Short: "prints the current configuration",
+	Short: "Get detailed information about the current configuration",
 	Example: `
 git-secrets info
 git-secrets info -d: Also decodes all secrets
@@ -103,8 +103,6 @@ git-secrets info -d -c prod: Decodes all secrets from the prod context
 
 func init() {
 	rootCmd.AddCommand(infoCmd)
-
-	rootCmd.Flags().BoolP(InfoCmdFlagDecode, "d", false, "Adds the decoded secrets to the info table")
 	infoCmd.Flags().BoolP(InfoCmdFlagDecode, "d", false, "Adds the decoded secrets to the info table")
 	// Here you will define your flags and configuration settings.
 

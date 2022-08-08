@@ -1,6 +1,6 @@
 <div align="center">
 <h2>Git Secrets</h2>
-<p>a cli tool to manage configurations and secrets across multiple environments all stored inside your repository.<br />git secrets is built to automate local tasks like setting up the project or deploying secrets manually.</p>
+<p>a cli tool to manage and deploy configurations and secrets across multiple environments all stored inside your repository.<br />git secrets is built to automate local tasks like setting up the project or deploying secrets manually.</p>
 <img src="https://img.shields.io/github/v/release/benammann/git-secrets" />
 <img src="https://img.shields.io/docker/v/benammann/git-secrets?label=image" />
 <img src="https://github.com/benammann/git-secrets/actions/workflows/goreleaser.yml/badge.svg" />
@@ -17,7 +17,7 @@
   * [Initialize the project](#initialize-the-project)
   * [Encode a secret and add a config entry](#encode-a-secret-and-add-a-config-entry)
   * [Decode the secrets and get the config entry](#decode-the-secrets-and-get-the-config-entry)
-  * [Create a `.env.dist` file](#create-a--envdist--file)
+  * [Create a `.env.dist` file](#create-a-envdist-file)
   * [Scan for plain secrets](#scan-for-plain-secrets)
   * [Custom Template Functions](#custom-template-functions)
     + [Base64Encode](#base64encode)
@@ -30,7 +30,7 @@
     + [Overwrite using CLI Args](#overwrite-using-cli-args)
 * [License](#license)
 
-### Features
+### Features 
 - Store secrets and configurations all in one place in your git repository
 - Render secrets and configurations to custom files (like .env, config or k8s files) using the go templating language (just like helm)
 - Manage multiple environments and inherit values from a default environment
@@ -96,6 +96,9 @@ The configuration is made in a json file called `.git-secrets.json` you can also
 ```bash
 # Create a new global encoder secret (which you can later share with your team)
 git secrets set global-secret mySecret --value $(pwgen -c 32 -n -s -y)
+
+# Get the value of the global encryption secret
+git secrets get global-secret mySecret
 
 # Create a new .git-secrets.json
 git secrets init

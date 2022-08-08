@@ -8,7 +8,7 @@ import (
 // getCmd represents the get command
 var getCmd = &cobra.Command{
 	Use:   "get",
-	Short: "allows you to get resources from the config",
+	Short: "Get resources like config, secret or global-secret",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -17,7 +17,7 @@ var getCmd = &cobra.Command{
 // getConfigCmd represents the getConfig command
 var getConfigCmd = &cobra.Command{
 	Use:   "config",
-	Short: "resolves a config from the config file",
+	Short: "Get a config entry from the config file",
 	Example: `
 git-secrets get config <configKey>
 git-secrets get config <configKey> -c prod
@@ -39,7 +39,7 @@ git-secrets get config <configKey> -c prod
 // getSecretCmd represents the getSecret command
 var getSecretCmd = &cobra.Command{
 	Use:   "secret",
-	Short: "resolves and decodes a secret",
+	Short: "Get and decode a secret entry from the config file",
 	Example: `
 git-secrets get secret <secretName>
 git-secrets get secret <secretName> -c prod

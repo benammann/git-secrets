@@ -18,7 +18,7 @@ type RenderFileData struct {
 // renderCmd represents the render command
 var renderCmd = &cobra.Command{
 	Use:   "render",
-	Short: "render files feature",
+	Short: "Render files using the go templating engine",
 	Example: `
 git-secrets render <targetName>: Render from configuration
 git-secrets render <targetName1>,<targetName2>,...: Renders multiple targets at once
