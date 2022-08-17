@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
-	gitutil "github.com/benammann/git-secrets/pkg/git_utility"
 	"github.com/benammann/git-secrets/pkg/utility"
 	"github.com/fatih/color"
 	"os"
@@ -34,7 +33,7 @@ var scanCmd = &cobra.Command{
 		scanAll, _ := cmd.Flags().GetBool(FlagAll)
 		verbose, _ := cmd.Flags().GetBool(FlagVerbose)
 
-		stagedFiles, errStagedFiles := gitutil.GetStagedFiles(scanAll)
+		stagedFiles, errStagedFiles := utility.GetStagedFiles(scanAll)
 		if errStagedFiles != nil {
 			cobra.CheckErr(errStagedFiles)
 		}

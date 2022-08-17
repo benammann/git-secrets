@@ -1,4 +1,4 @@
-package gitutil
+package utility
 
 import (
 	"fmt"
