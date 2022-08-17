@@ -4,10 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
-	cli_config "github.com/benammann/git-secrets/pkg/config/cli"
 	config_init "github.com/benammann/git-secrets/pkg/config/init"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"os"
 	"strings"
 )
@@ -26,13 +24,7 @@ git-secrets init
 			cobra.CheckErr(fmt.Errorf("can not initialize while having config file %s loaded. Please switch directories", projectCfgFile))
 		}
 
-		var secretKeys []string
-		for _, key := range viper.AllKeys() {
-			secretPrefix := fmt.Sprintf("%s.", cli_config.Secrets)
-			if strings.HasPrefix(key, secretPrefix) {
-				secretKeys = append(secretKeys, strings.Replace(key, secretPrefix, "", 1))
-			}
-		}
+		secretKeys := globalCfg.GetSecretKeys()
 
 		if len(secretKeys) < 0 {
 			cobra.CheckErr(fmt.Errorf("please create a global secret before: git secrets set global-secret <secret-name>"))

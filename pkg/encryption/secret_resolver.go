@@ -2,8 +2,7 @@ package encryption
 
 import (
 	"fmt"
-	"github.com/benammann/git-secrets/pkg/config/cli"
-	"github.com/spf13/viper"
+	global_config "github.com/benammann/git-secrets/pkg/config/global"
 	"os"
 )
 
@@ -17,7 +16,7 @@ type ConfigResolver interface {
 
 type MergedSecretResolver struct {
 	requestedSecretName string
-	configResolver      ConfigResolver
+	globalConfig        *global_config.GlobalConfigProvider
 	overwrites          map[string]string
 }
 
@@ -27,39 +26,20 @@ func (m *MergedSecretResolver) GetPlainSecret() (secret []byte, errResolve error
 		return []byte(m.overwrites[m.requestedSecretName]), nil
 	}
 
-	configKey := cli_config.NamedSecret(m.requestedSecretName)
-	configValue := m.configResolver.GetString(configKey)
-	if configValue == "" {
+	secretValue := m.globalConfig.GetSecret(m.requestedSecretName)
+	if secretValue == "" {
 		return nil, fmt.Errorf("secret %s can not be found globally. Either pass --secret %s=$(MY_SECRET_NAME) or configure it using git secret global-secret", m.requestedSecretName, m.requestedSecretName)
 	}
-	return []byte(configValue), nil
+	return []byte(secretValue), nil
 
 }
 
-func NewMergedSecretResolver(requestedSecretName string, configResolver ConfigResolver, overwrites map[string]string) SecretResolver {
+func NewMergedSecretResolver(requestedSecretName string, globalConfig *global_config.GlobalConfigProvider, overwrites map[string]string) SecretResolver {
 	return &MergedSecretResolver{
 		requestedSecretName: requestedSecretName,
-		configResolver:      configResolver,
+		globalConfig:        globalConfig,
 		overwrites:          overwrites,
 	}
-}
-
-type FromPlainSecretResolver struct {
-	SecretResolver
-	PlainSecret string
-}
-
-func NewPlainSecretResolver(plainSecret string) SecretResolver {
-	return &FromPlainSecretResolver{
-		PlainSecret: plainSecret,
-	}
-}
-
-func (rs *FromPlainSecretResolver) GetPlainSecret() (secret []byte, errResolve error) {
-	if rs.PlainSecret == "" {
-		return nil, fmt.Errorf("got empty secret")
-	}
-	return []byte(rs.PlainSecret), nil
 }
 
 type FromEnvSecretResolver struct {
@@ -79,24 +59,4 @@ func (rs *FromEnvSecretResolver) GetPlainSecret() (secret []byte, errResolve err
 		return nil, fmt.Errorf("env variable %s is empty", rs.envName)
 	}
 	return []byte(envValue), nil
-}
-
-type FromNameSecretResolver struct {
-	SecretResolver
-	secretName string
-}
-
-func NewNameSecretResolver(secretName string) SecretResolver {
-	return &FromNameSecretResolver{
-		secretName: secretName,
-	}
-}
-
-func (rs *FromNameSecretResolver) GetPlainSecret() (secret []byte, errResolve error) {
-	configKey := cli_config.NamedSecret(rs.secretName)
-	configValue := viper.GetString(configKey)
-	if configValue == "" {
-		return nil, fmt.Errorf("no secret configured at %s", configKey)
-	}
-	return []byte(configValue), nil
 }

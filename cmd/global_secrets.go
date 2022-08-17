@@ -3,12 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
-	cli_config "github.com/benammann/git-secrets/pkg/config/cli"
-	"github.com/benammann/git-secrets/pkg/encryption"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"regexp"
-	"strings"
 )
 
 // getGlobalSecretsCmd represents the globalSecrets command
@@ -24,20 +19,14 @@ git-secrets get global-secret <secretKey>: prints the global secret value
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
 			secretName := args[0]
-			resolvedSecret := viper.GetString(cli_config.NamedSecret(secretName))
+			resolvedSecret := globalCfg.GetSecret(secretName)
 			if resolvedSecret != "" {
 				fmt.Println(resolvedSecret)
 			} else {
 				cobra.CheckErr(fmt.Errorf("the secret %s does not exist", secretName))
 			}
 		} else {
-			var secretKeys []string
-			for _, key := range viper.AllKeys() {
-				secretPrefix := fmt.Sprintf("%s.", cli_config.Secrets)
-				if strings.HasPrefix(key, secretPrefix) {
-					secretKeys = append(secretKeys, strings.Replace(key, secretPrefix, "", 1))
-				}
-			}
+			secretKeys := globalCfg.GetSecretKeys()
 			for _, secretKey := range secretKeys {
 				fmt.Println(secretKey)
 			}
@@ -57,11 +46,8 @@ git-secrets set global-secret <secretKey> --value $MY_SECRET_VALUE_STORED_IN_ENV
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		isAlpha := regexp.MustCompile(`^[A-Za-z1-9]+$`).MatchString
-
 		isForce, _ := cmd.Flags().GetBool(FlagForce)
-
-		secretName := args[0]
+		secretKey := args[0]
 		secretValue, _ := cmd.Flags().GetString(FlagValue)
 
 		if secretValue == "" {
@@ -71,25 +57,13 @@ git-secrets set global-secret <secretKey> --value $MY_SECRET_VALUE_STORED_IN_ENV
 			cobra.CheckErr(errAsk)
 		}
 
-		if !isAlpha(secretName) {
-			cobra.CheckErr("only alphanumeric letters allowed [A-Za-z1-9] allowed")
-		}
-
-		if isInvalid := encryption.ValidateAESSecret(secretValue); isInvalid != nil {
-			cobra.CheckErr(fmt.Errorf("%s. hint: use 'git-secrets global-secret <key> --value $(pwgen -c 32 -n -s -y)' to generate a key", isInvalid.Error()))
-		}
-
-		finalKey := cli_config.NamedSecret(secretName)
-		resolvedSecret := viper.GetString(finalKey)
-		if resolvedSecret != "" && !isForce {
-			cobra.CheckErr(fmt.Errorf("the secret %s already exists. Use --force to overwrite the existing secret", secretName))
-		}
-		viper.Set(finalKey, secretValue)
-		errWrite := cli_config.WriteConfig()
+		errWrite := globalCfg.SetSecret(secretKey, secretValue, isForce)
 		if errWrite != nil {
 			cobra.CheckErr(fmt.Errorf("could not write config: %s", errWrite.Error()))
 		}
-		fmt.Println(finalKey, "written")
+
+		fmt.Printf("%s written. Use git secrets get global-secret %s to get it's value\n", secretKey, secretKey)
+
 	},
 }
 

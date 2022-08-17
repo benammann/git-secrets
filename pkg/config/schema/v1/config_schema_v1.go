@@ -5,9 +5,9 @@ import (
 	"fmt"
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
 	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
+	global_config "github.com/benammann/git-secrets/pkg/config/global"
 	"github.com/benammann/git-secrets/pkg/encryption"
 	"github.com/benammann/git-secrets/schema"
-	"github.com/spf13/viper"
 	"github.com/xeipuuv/gojsonschema"
 	"path/filepath"
 	"sort"
@@ -45,10 +45,10 @@ type RenderTarget struct {
 type Features struct {
 }
 
-var jsonLoader gojsonschema.JSONLoader
+var jsonLoaderV1 gojsonschema.JSONLoader
 
 func init() {
-	jsonLoader = gojsonschema.NewStringLoader(string(schema.GetSchemaContents(schema.V1)))
+	jsonLoaderV1 = gojsonschema.NewStringLoader(string(schema.GetSchemaContents(schema.V1)))
 }
 
 func IsV1(version int) bool {
@@ -101,10 +101,10 @@ func (s *Schema) validate() error {
 
 }
 
-func ParseSchemaV1(jsonInput []byte, configFileUsed string, overwrittenSecrets map[string]string) (*config_generic.Repository, error) {
+func ParseSchemaV1(jsonInput []byte, configFileUsed string, globalConfig *global_config.GlobalConfigProvider, overwrittenSecrets map[string]string) (*config_generic.Repository, error) {
 
 	jsonContentLoader := gojsonschema.NewStringLoader(string(jsonInput))
-	res, errValidate := gojsonschema.Validate(jsonLoader, jsonContentLoader)
+	res, errValidate := gojsonschema.Validate(jsonLoaderV1, jsonContentLoader)
 	if errValidate != nil {
 		return nil, fmt.Errorf("could not validate json schema: %s", errValidate.Error())
 	}
@@ -155,7 +155,7 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string, overwrittenSecrets m
 	})
 
 	for _, context := range contexts {
-		context.SecretResolver = getSecretResolver(Parsed.Context[context.Name].DecryptSecret, defaultContext, overwrittenSecrets)
+		context.SecretResolver = getSecretResolver(Parsed.Context[context.Name].DecryptSecret, defaultContext, globalConfig, overwrittenSecrets)
 		context.Encryption = encryption.NewAesEngine(context.SecretResolver)
 	}
 
@@ -234,7 +234,7 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string, overwrittenSecrets m
 
 }
 
-func getSecretResolver(val *DecryptSecret, defaultContext *config_generic.Context, overwrittenSecrets map[string]string) encryption.SecretResolver {
+func getSecretResolver(val *DecryptSecret, defaultContext *config_generic.Context, globalConfig *global_config.GlobalConfigProvider, overwrittenSecrets map[string]string) encryption.SecretResolver {
 	if val == nil {
 		return defaultContext.SecretResolver
 	}
@@ -242,14 +242,7 @@ func getSecretResolver(val *DecryptSecret, defaultContext *config_generic.Contex
 		return encryption.NewEnvSecretResolver(val.FromEnv)
 	}
 	if val.FromName != "" {
-		return encryption.NewMergedSecretResolver(val.FromName, &ViperStringResolver{}, overwrittenSecrets)
+		return encryption.NewMergedSecretResolver(val.FromName, globalConfig, overwrittenSecrets)
 	}
 	return defaultContext.SecretResolver
-}
-
-type ViperStringResolver struct {
-}
-
-func (v *ViperStringResolver) GetString(key string) string {
-	return viper.GetString(key)
 }

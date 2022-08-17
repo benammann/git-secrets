@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	cli_config "github.com/benammann/git-secrets/pkg/config/cli"
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
 	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
+	global_config "github.com/benammann/git-secrets/pkg/config/global"
 	config_parser "github.com/benammann/git-secrets/pkg/config/parser"
 	"github.com/benammann/git-secrets/pkg/render"
 	"github.com/spf13/cobra"
@@ -18,6 +18,7 @@ var commit string
 var date string
 
 var globalCfgFile string
+var globalCfg *global_config.GlobalConfigProvider
 var projectCfgFile string
 var projectCfg *config_generic.Repository
 var projectCfgError error
@@ -84,11 +85,13 @@ func init() {
 // initGlobalConfig reads in config file and ENV variables if set.
 func initGlobalConfig() {
 
+	customViper := viper.New()
+
 	shouldCheckErr := len(overwrittenSecrets) == 0
 
 	if globalCfgFile != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(globalCfgFile)
+		customViper.SetConfigFile(globalCfgFile)
 	} else {
 		// Find home directory.
 		home, err := os.UserHomeDir()
@@ -99,20 +102,23 @@ func initGlobalConfig() {
 		}
 
 		// Search config in home directory with name ".git-secrets" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName(".git-secrets")
+		customViper.AddConfigPath(home)
+		customViper.SetConfigType("yaml")
+		customViper.SetConfigName(".git-secrets")
 	}
 
-	viper.AutomaticEnv() // read in environment variables that match
-	cli_config.SetDefaults()
+	customViper.AutomaticEnv() // read in environment variables that match
 	// If a config file is found, read it in.
-	if errRead := viper.ReadInConfig(); errRead == nil {
+	if errRead := customViper.ReadInConfig(); errRead == nil {
 		cobra.CheckErr(errRead)
 	}
-	if _, err := os.Stat(viper.ConfigFileUsed()); err == nil {
-		viper.WatchConfig()
+	if _, err := os.Stat(customViper.ConfigFileUsed()); err == nil {
+		customViper.WatchConfig()
 	}
+
+	viperConfigStorage := global_config.NewViperConfigStorage(customViper)
+	globalCfg = global_config.NewGlobalConfigProvider(viperConfigStorage)
+
 }
 
 func initProjectConfig() {
@@ -127,7 +133,7 @@ func initProjectConfig() {
 		overwrittenSecretsMap[secretKey] = strings.Join(secretValues, "")
 	}
 
-	projectCfg, projectCfgError = config_parser.ParseRepository(projectCfgFile, overwrittenSecretsMap)
+	projectCfg, projectCfgError = config_parser.ParseRepository(projectCfgFile, globalCfg, overwrittenSecretsMap)
 
 }
 
