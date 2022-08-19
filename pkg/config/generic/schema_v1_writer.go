@@ -1,4 +1,4 @@
-package config_schema_v1
+package config_generic
 
 import (
 	"encoding/json"
@@ -8,11 +8,11 @@ import (
 )
 
 type V1Writer struct {
-	schema     Schema
+	schema     V1Schema
 	configPath string
 }
 
-func NewV1Writer(schema Schema, configPath string) *V1Writer {
+func NewV1Writer(schema V1Schema, configPath string) *V1Writer {
 	return &V1Writer{
 		schema:     schema,
 		configPath: configPath,
@@ -65,7 +65,7 @@ func (v *V1Writer) AddContext(contextName string) error {
 		return fmt.Errorf("the context %s does already exist", contextName)
 	}
 
-	v.schema.Context[contextName] = &ContextAwareSecrets{
+	v.schema.Context[contextName] = &V1ContextAwareSecrets{
 		Secrets: make(map[string]string),
 		Configs: make(map[string]string),
 	}
@@ -77,12 +77,12 @@ func (v *V1Writer) AddContext(contextName string) error {
 func (v *V1Writer) AddFileToRender(targetName string, fileIn string, fileOut string) error {
 
 	if v.schema.RenderFiles == nil {
-		v.schema.RenderFiles = make(map[string]*RenderTarget)
+		v.schema.RenderFiles = make(map[string]*V1RenderTarget)
 	}
 
 	if v.schema.RenderFiles[targetName] == nil {
-		v.schema.RenderFiles[targetName] = &RenderTarget{
-			Files: []*RenderTargetFileEntry{},
+		v.schema.RenderFiles[targetName] = &V1RenderTarget{
+			Files: []*V1RenderTargetFileEntry{},
 		}
 	}
 
@@ -99,7 +99,7 @@ func (v *V1Writer) AddFileToRender(targetName string, fileIn string, fileOut str
 		return fmt.Errorf("the combination %s / %s is already added to target %s", fileIn, fileOut, targetName)
 	}
 
-	v.schema.RenderFiles[targetName].Files = append(v.schema.RenderFiles[targetName].Files, &RenderTargetFileEntry{
+	v.schema.RenderFiles[targetName].Files = append(v.schema.RenderFiles[targetName].Files, &V1RenderTargetFileEntry{
 		FileIn:  fileIn,
 		FileOut: fileOut,
 	})
@@ -116,7 +116,7 @@ func (v *V1Writer) WriteConfig() error {
 		}
 	}
 
-	if errValidate := v.schema.validate(); errValidate != nil {
+	if errValidate := v.schema.validateSchemaV1(); errValidate != nil {
 		return fmt.Errorf("not writing config since it is not valid: %s", errValidate.Error())
 	}
 

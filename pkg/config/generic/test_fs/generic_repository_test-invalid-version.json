@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../../schema/def/v1.json",
+  "version": 2,
+  "context": {
+    "default": {
+      "decryptSecret": {
+        "fromName": "gitsecretstest"
+      },
+      "secrets": {},
+      "configs": {}
+    },
+    "prod": {
+      "secrets": {}
+    }
+  }
+}

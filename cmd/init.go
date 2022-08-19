@@ -75,7 +75,7 @@ git-secrets init
 			cobra.CheckErr(fmt.Errorf("output file %s must have .json file ending", questionResponse.OutputFile))
 		}
 
-		errWrite := config_init.WriteInitialConfig(questionResponse.OutputFile, questionResponse.SecretName)
+		errWrite := config_init.WriteInitialConfig(fs, questionResponse.OutputFile, questionResponse.SecretName)
 		if errWrite != nil {
 			cobra.CheckErr(errWrite)
 		}

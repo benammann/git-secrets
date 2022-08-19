@@ -4,6 +4,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"github.com/spf13/afero"
 	"os"
 	"strings"
 )
@@ -12,10 +13,10 @@ import (
 var staticFiles embed.FS
 
 // WriteInitialConfig writes an initial config
-func WriteInitialConfig(fileName string, secretName string) error {
+func WriteInitialConfig(fileSystem afero.Fs, fileName string, secretName string) error {
 
 	// check if the file already exists
-	if _, err := os.Stat(fileName); errors.Is(err, os.ErrExist) {
+	if _, err := fileSystem.Stat(fileName); errors.Is(err, os.ErrExist) {
 		return fmt.Errorf("%s exists", fileName)
 	}
 
@@ -28,7 +29,7 @@ func WriteInitialConfig(fileName string, secretName string) error {
 	finalInitConfig := strings.ReplaceAll(string(initConfig), "{{secretName}}", secretName)
 
 	// copy the file to its destination
-	errFsFile := os.WriteFile(fileName, []byte(finalInitConfig), 0664)
+	errFsFile := afero.WriteFile(fileSystem, fileName, []byte(finalInitConfig), 0664)
 	if errFsFile != nil {
 		return fmt.Errorf("could not write %s: %s", fileName, errFsFile.Error())
 	}

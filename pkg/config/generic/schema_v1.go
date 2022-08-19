@@ -1,10 +1,9 @@
-package config_schema_v1
+package config_generic
 
 import (
 	"encoding/json"
 	"fmt"
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
-	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
 	global_config "github.com/benammann/git-secrets/pkg/config/global"
 	"github.com/benammann/git-secrets/pkg/encryption"
 	"github.com/benammann/git-secrets/schema"
@@ -13,36 +12,33 @@ import (
 	"sort"
 )
 
-type Schema struct {
-	Schema      string                   `json:"$schema,omitempty"`
-	Version     int                      `json:"version"`
-	Context     Context                  `json:"context"`
-	RenderFiles map[string]*RenderTarget `json:"renderFiles,omitempty"`
+type V1Schema struct {
+	Schema      string                     `json:"$schema,omitempty"`
+	Version     int                        `json:"version"`
+	Context     V1Context                  `json:"context"`
+	RenderFiles map[string]*V1RenderTarget `json:"renderFiles,omitempty"`
 }
 
-type DecryptSecret struct {
+type V1DecryptSecret struct {
 	FromName string `json:"fromName,omitempty"`
 	FromEnv  string `json:"fromEnv,omitempty"`
 }
 
-type ContextAwareSecrets struct {
-	DecryptSecret *DecryptSecret    `json:"decryptSecret,omitempty"`
+type V1ContextAwareSecrets struct {
+	DecryptSecret *V1DecryptSecret  `json:"decryptSecret,omitempty"`
 	Secrets       map[string]string `json:"secrets,omitempty"`
 	Configs       map[string]string `json:"configs,omitempty"`
 }
 
-type Context map[string]*ContextAwareSecrets
+type V1Context map[string]*V1ContextAwareSecrets
 
-type RenderTargetFileEntry struct {
+type V1RenderTargetFileEntry struct {
 	FileIn  string `json:"fileIn"`
 	FileOut string `json:"fileOut"`
 }
 
-type RenderTarget struct {
-	Files []*RenderTargetFileEntry `json:"files"`
-}
-
-type Features struct {
+type V1RenderTarget struct {
+	Files []*V1RenderTargetFileEntry `json:"files"`
 }
 
 var jsonLoaderV1 gojsonschema.JSONLoader
@@ -51,13 +47,13 @@ func init() {
 	jsonLoaderV1 = gojsonschema.NewStringLoader(string(schema.GetSchemaContents(schema.V1)))
 }
 
-func IsV1(version int) bool {
+func IsSchemaV1(version int) bool {
 	return !(version < 1 || version > 1)
 }
 
-func (s *Schema) validate() error {
+func (s *V1Schema) validateSchemaV1() error {
 
-	if !IsV1(s.Version) {
+	if !IsSchemaV1(s.Version) {
 		return fmt.Errorf("not able to process version %d", s.Version)
 	}
 
@@ -101,12 +97,12 @@ func (s *Schema) validate() error {
 
 }
 
-func ParseSchemaV1(jsonInput []byte, configFileUsed string, globalConfig *global_config.GlobalConfigProvider, overwrittenSecrets map[string]string) (*config_generic.Repository, error) {
+func ParseSchemaV1(jsonInput []byte, configFileUsed string, globalConfig *global_config.GlobalConfigProvider, overwrittenSecrets map[string]string) (*Repository, error) {
 
 	jsonContentLoader := gojsonschema.NewStringLoader(string(jsonInput))
 	res, errValidate := gojsonschema.Validate(jsonLoaderV1, jsonContentLoader)
 	if errValidate != nil {
-		return nil, fmt.Errorf("could not validate json schema: %s", errValidate.Error())
+		return nil, fmt.Errorf("could not validateSchemaV1 json schema: %s", errValidate.Error())
 	}
 
 	if res.Valid() == false {
@@ -116,28 +112,28 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string, globalConfig *global
 		return nil, fmt.Errorf("invalid json passed")
 	}
 
-	var Parsed Schema
+	var Parsed V1Schema
 	errParse := json.Unmarshal(jsonInput, &Parsed)
 	if errParse != nil {
 		return nil, fmt.Errorf("could not parse json: %s", errParse.Error())
 	}
 
-	if errValidate := Parsed.validate(); errValidate != nil {
+	if errValidate := Parsed.validateSchemaV1(); errValidate != nil {
 		return nil, fmt.Errorf("validation error: %s", errValidate.Error())
 	}
 
 	// all resulting contexts
-	var contexts []*config_generic.Context
+	var contexts []*Context
 
 	// locally store the default context
-	var defaultContext *config_generic.Context
+	var defaultContext *Context
 
 	// all render targets to add
-	var renderTargets []*config_generic.RenderTarget
+	var renderTargets []*RenderTarget
 
 	// first, initialize all contexts
 	for contextKey, contextValue := range Parsed.Context {
-		localContext := &config_generic.Context{
+		localContext := &Context{
 			Name:             contextKey,
 			EncryptedSecrets: contextValue.Secrets,
 			Configs:          contextValue.Configs,
@@ -155,14 +151,14 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string, globalConfig *global
 	})
 
 	for _, context := range contexts {
-		context.SecretResolver = getSecretResolver(Parsed.Context[context.Name].DecryptSecret, defaultContext, globalConfig, overwrittenSecrets)
+		context.SecretResolver = getSecretResolverV1(Parsed.Context[context.Name].DecryptSecret, defaultContext, globalConfig, overwrittenSecrets)
 		context.Encryption = encryption.NewAesEngine(context.SecretResolver)
 	}
 
 	if Parsed.RenderFiles != nil {
 		for targetName, renderTarget := range Parsed.RenderFiles {
 			if renderTarget.Files != nil {
-				finalRenderTarget := config_generic.NewRenderTarget(targetName)
+				finalRenderTarget := NewRenderTarget(targetName)
 				for _, fileToRender := range renderTarget.Files {
 					configDir := filepath.Dir(configFileUsed)
 					fileIn := filepath.Join(configDir, fileToRender.FileIn)
@@ -177,11 +173,11 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string, globalConfig *global
 		}
 	}
 
-	var secrets []*config_generic.Secret
+	var secrets []*Secret
 
 	for _, context := range contexts {
 		for secretKey, encryptedSecret := range context.EncryptedSecrets {
-			secrets = append(secrets, &config_generic.Secret{
+			secrets = append(secrets, &Secret{
 				Name:          secretKey,
 				OriginContext: context,
 				EncodedValue:  encryptedSecret,
@@ -189,10 +185,10 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string, globalConfig *global
 		}
 	}
 
-	var configs []*config_generic.Config
+	var configs []*Config
 	for _, context := range contexts {
 		for configKey, configValue := range context.Configs {
-			configs = append(configs, &config_generic.Config{
+			configs = append(configs, &Config{
 				Name:          configKey,
 				Value:         configValue,
 				OriginContext: context,
@@ -201,7 +197,7 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string, globalConfig *global
 	}
 
 	configWriter := NewV1Writer(Parsed, configFileUsed)
-	repository := config_generic.NewRepository(1, configFileUsed, configWriter)
+	repository := NewRepository(1, configFileUsed, configWriter)
 
 	for _, resultingContext := range contexts {
 		errAddContext := repository.AddContext(resultingContext)
@@ -234,7 +230,7 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string, globalConfig *global
 
 }
 
-func getSecretResolver(val *DecryptSecret, defaultContext *config_generic.Context, globalConfig *global_config.GlobalConfigProvider, overwrittenSecrets map[string]string) encryption.SecretResolver {
+func getSecretResolverV1(val *V1DecryptSecret, defaultContext *Context, globalConfig *global_config.GlobalConfigProvider, overwrittenSecrets map[string]string) encryption.SecretResolver {
 	if val == nil {
 		return defaultContext.SecretResolver
 	}

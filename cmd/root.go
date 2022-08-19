@@ -4,14 +4,16 @@ import (
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
 	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
 	global_config "github.com/benammann/git-secrets/pkg/config/global"
-	config_parser "github.com/benammann/git-secrets/pkg/config/parser"
 	"github.com/benammann/git-secrets/pkg/render"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"os"
 	"strings"
 
 	"github.com/spf13/viper"
 )
+
+var fs = afero.NewOsFs()
 
 var version string
 var commit string
@@ -86,6 +88,7 @@ func init() {
 func initGlobalConfig() {
 
 	customViper := viper.New()
+	customViper.SetFs(afero.NewOsFs())
 
 	shouldCheckErr := len(overwrittenSecrets) == 0
 
@@ -133,7 +136,7 @@ func initProjectConfig() {
 		overwrittenSecretsMap[secretKey] = strings.Join(secretValues, "")
 	}
 
-	projectCfg, projectCfgError = config_parser.ParseRepository(projectCfgFile, globalCfg, overwrittenSecretsMap)
+	projectCfg, projectCfgError = config_generic.ParseRepositoryFromPath(projectCfgFile, globalCfg, overwrittenSecretsMap)
 
 }
 
