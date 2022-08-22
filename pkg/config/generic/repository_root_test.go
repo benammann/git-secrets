@@ -17,6 +17,8 @@ const GlobalSecretValue = "eeSaoghoh8oi9leed7hai4looK3jae1N"
 const TestFileBlankDefault = "generic_repository_test-blank-default.json"
 const TestFileBlankTwoContexts = "generic_repository_test-blank-two-contexts.json"
 const TestFileBlankInvalidVersion = "generic_repository_test-invalid-version.json"
+const TestFileConfigEntries = "generic_repository_test-config-entries.json"
+const TestFileMissingEncryptionSecret = "generic_repository_test-missing-encryption-secret.json"
 
 func createTestRepository(fileName string, selectedContextName string) (*Repository, error) {
 	fileName = fmt.Sprintf("test_fs/%s", fileName)
@@ -32,6 +34,13 @@ func createTestRepository(fileName string, selectedContextName string) (*Reposit
 		return nil, fmt.Errorf("could not set context: %s", errSetContext.Error())
 	}
 	return repository, nil
+}
+
+func initRepository(t *testing.T, fileName string, selectedContextName string) *Repository {
+	repo, errParse := createTestRepository(fileName, selectedContextName)
+	assert.NotNil(t, repo)
+	assert.NoError(t, errParse)
+	return repo
 }
 
 func TestNewRepository(t *testing.T) {

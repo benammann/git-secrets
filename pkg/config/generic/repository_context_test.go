@@ -8,9 +8,7 @@ import (
 
 func TestContext_DecodeValue(t *testing.T) {
 
-	repo, errParse := createTestRepository(TestFileBlankDefault, "default")
-	assert.NotNil(t, repo)
-	assert.NoError(t, errParse)
+	repo := initRepository(t, TestFileBlankDefault, "default")
 
 	ctx := repo.GetCurrent()
 
@@ -36,9 +34,7 @@ func TestContext_DecodeValue(t *testing.T) {
 
 func TestContext_EncodeValue(t *testing.T) {
 
-	repo, errParse := createTestRepository(TestFileBlankDefault, "default")
-	assert.NotNil(t, repo)
-	assert.NoError(t, errParse)
+	repo := initRepository(t, TestFileBlankDefault, "default")
 
 	ctx := repo.GetCurrent()
 	encodedValue, errEncode := ctx.EncodeValue("Hello World")
@@ -47,28 +43,95 @@ func TestContext_EncodeValue(t *testing.T) {
 	_, errB64 := base64.StdEncoding.DecodeString(encodedValue)
 	assert.NoError(t, errB64)
 
+	failingRepo := initRepository(t, TestFileMissingEncryptionSecret, "default")
+	failingCtx := failingRepo.GetCurrent()
+	assert.NotNil(t, failingCtx)
+	failedValue, expectedErr := failingCtx.EncodeValue("Hello World")
+	assert.Error(t, expectedErr)
+	assert.Equal(t, "", failedValue)
+
 }
 
 func TestRepository_AddContext(t *testing.T) {
+
+	repo := initRepository(t, TestFileBlankDefault, "default")
+	repo.contexts = []*Context{}
+
+	defaultCtx := &Context{
+		Name: "default",
+	}
+
+	prodCtx := &Context{
+		Name: "prod",
+	}
+
+	assert.Error(t, repo.AddContext(prodCtx))
+	assert.NoError(t, repo.AddContext(defaultCtx))
+	assert.Error(t, repo.AddContext(defaultCtx))
+	assert.NoError(t, repo.AddContext(prodCtx))
+
+	assert.Equal(t, defaultCtx, repo.GetContext("default"))
+	assert.Equal(t, prodCtx, repo.GetContext("prod"))
 
 }
 
 func TestRepository_GetContext(t *testing.T) {
 
+	repo := initRepository(t, TestFileBlankDefault, "default")
+
+	testCtx := &Context{
+		Name: "test",
+	}
+
+	assert.NoError(t, repo.AddContext(testCtx))
+
+	assert.NotNil(t, repo.GetContext("default"))
+	assert.Equal(t, testCtx, repo.GetContext("test"))
+	assert.Nil(t, repo.GetContext("missingContext"))
+
 }
 
 func TestRepository_GetContexts(t *testing.T) {
-
+	repo := initRepository(t, TestFileBlankTwoContexts, "default")
+	assert.Equal(t, repo.contexts, repo.GetContexts())
+	assert.Len(t, repo.GetContexts(), 2)
 }
 
 func TestRepository_GetCurrent(t *testing.T) {
+	repo := initRepository(t, TestFileBlankTwoContexts, "default")
+	defaultCtx := repo.GetContext("default")
+	prodCtx := repo.GetContext("prod")
+	assert.NotNil(t, defaultCtx)
+	assert.NotNil(t, prodCtx)
 
+	assert.Equal(t, defaultCtx, repo.GetCurrent())
+	_, errSetCtx := repo.SetSelectedContext("prod")
+	assert.NoError(t, errSetCtx)
+	assert.Equal(t, prodCtx, repo.GetCurrent())
 }
 
 func TestRepository_GetDefault(t *testing.T) {
-
+	repo := initRepository(t, TestFileBlankTwoContexts, "default")
+	defaultCtx := repo.GetContext("default")
+	assert.NotNil(t, defaultCtx)
+	assert.Equal(t, defaultCtx, repo.GetDefault())
 }
 
 func TestRepository_SetSelectedContext(t *testing.T) {
+
+	repo := initRepository(t, TestFileBlankTwoContexts, "default")
+
+	defaultCtx := repo.GetContext("default")
+	prodCtx := repo.GetContext("prod")
+	assert.NotNil(t, defaultCtx)
+	assert.NotNil(t, prodCtx)
+
+	ctxOut, errSetCtx := repo.SetSelectedContext("prod")
+	assert.NoError(t, errSetCtx)
+	assert.Equal(t, ctxOut, prodCtx)
+
+	emptyOut, errSetMissing := repo.SetSelectedContext("missingContext")
+	assert.Error(t, errSetMissing)
+	assert.Nil(t, emptyOut)
 
 }
