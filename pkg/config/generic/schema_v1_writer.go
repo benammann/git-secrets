@@ -4,16 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
+	"github.com/spf13/afero"
 	"os"
 )
 
 type V1Writer struct {
 	schema     V1Schema
 	configPath string
+	fs         afero.Fs
 }
 
-func NewV1Writer(schema V1Schema, configPath string) *V1Writer {
+func NewV1Writer(fs afero.Fs, schema V1Schema, configPath string) *V1Writer {
 	return &V1Writer{
+		fs:         fs,
 		schema:     schema,
 		configPath: configPath,
 	}
@@ -122,7 +125,7 @@ func (v *V1Writer) WriteConfig() error {
 
 	newConfig, _ := json.MarshalIndent(v.schema, "", "  ")
 
-	f, err := os.OpenFile(v.configPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0664)
+	f, err := v.fs.OpenFile(v.configPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0664)
 	if err != nil {
 		return fmt.Errorf("could not open config: %s", err.Error())
 	}

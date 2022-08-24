@@ -7,6 +7,7 @@ import (
 	global_config "github.com/benammann/git-secrets/pkg/config/global"
 	"github.com/benammann/git-secrets/pkg/encryption"
 	"github.com/benammann/git-secrets/schema"
+	"github.com/spf13/afero"
 	"github.com/xeipuuv/gojsonschema"
 	"path/filepath"
 	"sort"
@@ -196,7 +197,7 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string, globalConfig *global
 		}
 	}
 
-	configWriter := NewV1Writer(Parsed, configFileUsed)
+	configWriter := NewV1Writer(afero.NewOsFs(), Parsed, configFileUsed)
 	repository := NewRepository(1, configFileUsed, configWriter)
 
 	for _, resultingContext := range contexts {

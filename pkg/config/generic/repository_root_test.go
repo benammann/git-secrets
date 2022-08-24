@@ -19,6 +19,8 @@ const TestFileBlankTwoContexts = "generic_repository_test-blank-two-contexts.jso
 const TestFileBlankInvalidVersion = "generic_repository_test-invalid-version.json"
 const TestFileConfigEntries = "generic_repository_test-config-entries.json"
 const TestFileMissingEncryptionSecret = "generic_repository_test-missing-encryption-secret.json"
+const TestFileRealWorld = "generic_repository_test-real-world.json"
+const TestFileBlankDefaultRenderFilesMissingKey = "generic_repository_test-blank-render-files-missing-key.json"
 
 func createTestRepository(fileName string, selectedContextName string) (*Repository, error) {
 	fileName = fmt.Sprintf("test_fs/%s", fileName)

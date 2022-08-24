@@ -1,0 +1,46 @@
+{
+  "$schema": "https://raw.githubusercontent.com/benammann/git-secrets/dev-beta/schema/def/v1.json",
+  "version": 1,
+  "context": {
+    "default": {
+      "decryptSecret": {
+        "fromName": "gitSecretsTest"
+      },
+      "secrets": {
+        "databasePassword": "prPy40oRzdeFelmL5xVhbadEWNV9puR3/aWTY+gTYXOrT2bksi5GS9lCTKi66A3ePYa0hbwMqXadlDZw"
+      },
+      "configs": {
+        "databaseHost": "database.svc.local",
+        "databasePort": "3306"
+      }
+    },
+    "prod": {
+      "secrets": {
+        "databasePassword": "g8C/GHbk8vCU4iTWDqOWenJWRevyS69vizTcSjKjR0h36l7Nobhdv3wK3L1S5yRkJJxzm+p+TT0bpWon"
+      },
+      "configs": {
+        "databaseHost": "database-prod.svc.cluster",
+        "databasePort": "3307"
+      }
+    },
+    "staging": {
+      "secrets": {
+        "databasePassword": "4Y2jUHEvsy+cYhamCz49qjkUPCCUNdvePb2WAptvlNg54wmzBBN6QvgJl7p/N602tC7zKNT6Vn52RcxN"
+      },
+      "configs": {
+        "databaseHost": "database-stg.svc.cluster",
+        "databasePort": "3307"
+      }
+    }
+  },
+  "renderFiles": {
+    "env": {
+      "files": [
+        {
+          "fileIn": "templates/.env.dist",
+          "fileOut": "templates/.env"
+        }
+      ]
+    }
+  }
+}
