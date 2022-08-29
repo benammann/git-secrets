@@ -86,9 +86,19 @@ func (s *V1Schema) validateSchemaV1() error {
 			continue
 		}
 
-		for secretKey, _ := range contextValue.Secrets {
-			if defaultContext.Secrets[secretKey] == "" {
-				return fmt.Errorf("secret %s exists in context %s but not in default context", secretKey, contextKey)
+		if contextValue.Secrets != nil {
+			for secretKey, _ := range contextValue.Secrets {
+				if defaultContext.Secrets[secretKey] == "" {
+					return fmt.Errorf("secret %s exists in context %s but not in default context", secretKey, contextKey)
+				}
+			}
+		}
+
+		if contextValue.Configs != nil {
+			for configKey, _ := range contextValue.Configs {
+				if defaultContext.Configs[configKey] == "" {
+					return fmt.Errorf("config entry %s exists in context %s but not in default context", configKey, contextKey)
+				}
 			}
 		}
 

@@ -32,6 +32,10 @@ func (v *V1Writer) SetSecret(contextName string, secretName string, secretEncode
 		v.schema.Context[contextName].Secrets = make(map[string]string)
 	}
 
+	if contextName != config_const.DefaultContextName && v.schema.Context[config_const.DefaultContextName].Secrets[secretName] == "" {
+		return fmt.Errorf("you need to define secret entry %s in the default context first", secretName)
+	}
+
 	if v.schema.Context[contextName].Secrets[secretName] != "" && force == false {
 		return fmt.Errorf("the secret %s does already exist. Use --force to overwrite", secretName)
 	}
@@ -50,6 +54,10 @@ func (v *V1Writer) SetConfig(contextName string, configName string, configValue 
 
 	if v.schema.Context[contextName].Configs == nil {
 		v.schema.Context[contextName].Configs = make(map[string]string)
+	}
+
+	if contextName != config_const.DefaultContextName && v.schema.Context[config_const.DefaultContextName].Configs[configName] == "" {
+		return fmt.Errorf("you need to define config entry %s in the default context first", configName)
 	}
 
 	if v.schema.Context[contextName].Configs[configName] != "" && force == false {
