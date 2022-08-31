@@ -1,0 +1,6 @@
+{
+  "$schema": "https://raw.githubusercontent.com/benammann/git-secrets/dev-beta/schema/def/v1.json",
+  "version": 1,
+  "context": {
+  }
+}

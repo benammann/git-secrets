@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	global_config "github.com/benammann/git-secrets/pkg/config/global"
+	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -16,10 +17,13 @@ const GlobalSecretValue = "eeSaoghoh8oi9leed7hai4looK3jae1N"
 
 const TestFileBlankDefault = "generic_repository_test-blank-default.json"
 const TestFileBlankTwoContexts = "generic_repository_test-blank-two-contexts.json"
-const TestFileBlankInvalidVersion = "generic_repository_test-invalid-version.json"
+const TestFileBlankInvalidVersion = "generic_repository_test-generic_repository_test-invalid-version.json"
 const TestFileConfigEntries = "generic_repository_test-config-entries.json"
 const TestFileMissingEncryptionSecret = "generic_repository_test-missing-encryption-secret.json"
 const TestFileRealWorld = "generic_repository_test-real-world.json"
+const TestFileInvalidJson = "generic_repository_test-invalid-json.json"
+const TestFileInvalidJsonV1 = "generic_repository_test-invalid-version-v1.json"
+const TestFileInvalidVersion = "generic_repository_test-invalid-version.json"
 const TestFileBlankDefaultRenderFilesMissingKey = "generic_repository_test-blank-render-files-missing-key.json"
 
 func createTestRepository(fileName string, selectedContextName string) (*Repository, error) {
@@ -27,7 +31,9 @@ func createTestRepository(fileName string, selectedContextName string) (*Reposit
 	globalConfig := global_config.NewGlobalConfigProvider(global_config.NewMemoryStorageProvider())
 	_ = globalConfig.SetSecret(GlobalSecretKey, GlobalSecretValue, false)
 	mergeGlobalSecrets := make(map[string]string)
-	repository, errParse := ParseRepositoryFromReadFileFs(testFiles, fileName, globalConfig, mergeGlobalSecrets)
+	repository, errParse := ParseRepository(afero.FromIOFS{
+		FS: testFiles,
+	}, fileName, globalConfig, mergeGlobalSecrets)
 	if errParse != nil {
 		return nil, fmt.Errorf("could not parse: %s", errParse.Error())
 	}

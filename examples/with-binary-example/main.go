@@ -3,15 +3,16 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/spf13/afero"
 	"log"
 	"os"
 	"strings"
 )
 
 func main() {
-
-	ParseEnv(".env")
-
+	if errParse := ParseEnv(afero.NewOsFs(), ".env"); errParse != nil {
+		log.Fatal(errParse)
+	}
 	DebugEnv("Database Host", "DATABASE_HOST")
 	DebugEnv("Database Port", "DATABASE_PORT")
 	DebugEnv("Database Name", "DATABASE_NAME")
@@ -23,10 +24,10 @@ func DebugEnv(description string, envName string) {
 }
 
 // ParseEnv is a custom env parser, not respecting any specs just for this example
-func ParseEnv(fileName string) {
-	file, err := os.Open(fileName)
+func ParseEnv(fs afero.Fs, fileName string) error {
+	file, err := fs.Open(fileName)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
@@ -41,15 +42,17 @@ func ParseEnv(fileName string) {
 		keyAndValue := strings.Split(line, "=")
 		envKey, envValue := keyAndValue[0], keyAndValue[1]
 		if errSetEnv := os.Setenv(envKey, envValue); errSetEnv != nil {
-			fmt.Printf("could not set %s as %s: %s", envKey, envValue, errSetEnv.Error())
-			continue
+			return fmt.Errorf("could not set %s as %s: %s", envKey, envValue, errSetEnv.Error())
+
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+	if errScan := scanner.Err(); errScan != nil {
+		return errScan
 	}
 
 	fmt.Println("Environment Used:", fileName)
+
+	return nil
 
 }

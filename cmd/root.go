@@ -136,7 +136,7 @@ func initProjectConfig() {
 		overwrittenSecretsMap[secretKey] = strings.Join(secretValues, "")
 	}
 
-	projectCfg, projectCfgError = config_generic.ParseRepositoryFromPath(projectCfgFile, globalCfg, overwrittenSecretsMap)
+	projectCfg, projectCfgError = config_generic.ParseRepository(fs, projectCfgFile, globalCfg, overwrittenSecretsMap)
 
 }
 
