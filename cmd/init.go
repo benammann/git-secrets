@@ -13,9 +13,10 @@ import (
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Initializes a new .git-secrets.json Project",
+	Short: "Initializes a new .git-secrets.json project",
 	Example: `
-git-secrets init
+git secrets init
+git secrets init -f custom-file-name.json
 `,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -81,10 +82,10 @@ git-secrets init
 		}
 
 		fmt.Println(questionResponse.OutputFile, "written")
-		fmt.Println("Info: git-secrets info -d")
-		fmt.Println("Add Context: git-secrets add context <contextName>")
-		fmt.Println("Set Config: git-secrets set config <configKey> <configValue>")
-		fmt.Println("Set Secret: git-secrets set secret <secretKey>")
+		fmt.Println("Info: git secrets info -d")
+		fmt.Println("Add Context: git secrets add context <contextName>")
+		fmt.Println("Set Config: git secrets set config <configKey> <configValue>")
+		fmt.Println("Set Secret: git secrets set secret <secretKey>")
 
 	},
 }

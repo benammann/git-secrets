@@ -29,7 +29,6 @@ require (
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/spf13/afero v1.9.2 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
@@ -48,5 +47,6 @@ require (
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.4
 	github.com/onsi/gomega v1.19.0 // indirect
+	github.com/spf13/afero v1.9.2
 	github.com/tcnksm/go-gitconfig v0.1.2
 )

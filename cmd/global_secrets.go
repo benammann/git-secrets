@@ -11,8 +11,8 @@ var getGlobalSecretsCmd = &cobra.Command{
 	Use:   "global-secret",
 	Short: "Get or list a secret from the global configuration",
 	Example: `
-git-secrets get global-secrets: get all global secret keys
-git-secrets get global-secret <secretKey>: prints the global secret value
+git secrets get global-secrets: get all global secret keys
+git secrets get global-secret <secretKey>: prints the global secret value
 `,
 	Aliases: []string{"global-secrets", "gs"},
 	Args:    cobra.RangeArgs(0, 1),
@@ -39,8 +39,8 @@ var setGlobalSecretsCmd = &cobra.Command{
 	Use:   "global-secret",
 	Short: "Write a secret to the global configuration",
 	Example: `
-git-secrets set global-secret <secretKey>: sets the global secret from terminal input
-git-secrets set global-secret <secretKey> --value $MY_SECRET_VALUE_STORED_IN_ENV: sets the global secret value from --value parameter (insecure)
+git secrets set global-secret <secretKey>: sets the global secret from terminal input
+git secrets set global-secret <secretKey> --value $MY_SECRET_VALUE_STORED_IN_ENV: sets the global secret value from --value parameter (insecure)
 `,
 	Aliases: []string{"global-secrets", "gs"},
 	Args:    cobra.ExactArgs(1),

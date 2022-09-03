@@ -16,9 +16,9 @@ var infoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Get detailed information about the current configuration",
 	Example: `
-git-secrets info
-git-secrets info -d: Also decodes all secrets
-git-secrets info -d -c prod: Decodes all secrets from the prod context
+git secrets info
+git secrets info -d: Also decodes all secrets
+git secrets info -d -c prod: Decodes all secrets from the prod context
 `,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		cobra.CheckErr(projectCfgError)

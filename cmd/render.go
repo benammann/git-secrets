@@ -20,17 +20,17 @@ var renderCmd = &cobra.Command{
 	Use:   "render",
 	Short: "Render files using the go templating engine",
 	Example: `
-git-secrets render <targetName>: Render from configuration
-git-secrets render <targetName1>,<targetName2>,...: Renders multiple targets at once
-git-secrets render <fileIn> <fileOut> --debug: Render a specific file instead of the configured ones
-git-secrets render <targetName> -c prod: Render files for the prod context
-git-secrets render <targetName> --dry-run: Render files and print them to the console
-git-secrets render <targetName> --dry-run --debug: Dry run render and shows the rendering context
-git-secrets render <targetName> --debug: Render and write the rendering target
+git secrets render <targetName>: Render from configuration
+git secrets render <targetName1>,<targetName2>,...: Renders multiple targets at once
+git secrets render <fileIn> <fileOut> --debug: Render a specific file instead of the configured ones
+git secrets render <targetName> -c prod: Render files for the prod context
+git secrets render <targetName> --dry-run: Render files and print them to the console
+git secrets render <targetName> --dry-run --debug: Dry run render and shows the rendering context
+git secrets render <targetName> --debug: Render and write the rendering target
 `,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if !(len(args) == 0 || len(args) == 1 || len(args) == 2) {
-			return fmt.Errorf("usage: git-secrets render <target> or git-secrets render <file-in> <file-out>")
+			return fmt.Errorf("usage: git secrets render <target> or git secrets render <file-in> <file-out>")
 		}
 		return nil
 	},
@@ -44,8 +44,8 @@ git-secrets render <targetName> --debug: Render and write the rendering target
 
 		var filesToRender []*config_generic.FileToRender
 		if len(args) == 0 {
-			fmt.Println("Usage: git-secrets render <targetName1>,<targetName2>,...")
-			fmt.Println("Render using another context: git-secrets render <targetName> -c <contextName>")
+			fmt.Println("Usage: git secrets render <targetName1>,<targetName2>,...")
+			fmt.Println("Render using another context: git secrets render <targetName> -c <contextName>")
 			cobra.CheckErr(fmt.Errorf("You must specify a rendering context. Available targets: %s", strings.Join(projectCfg.RenderTargetNames(), ", ")))
 		} else if len(args) == 1 {
 

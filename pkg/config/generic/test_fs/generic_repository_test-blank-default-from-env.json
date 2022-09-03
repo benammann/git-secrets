@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/benammann/git-secrets/dev-beta/schema/def/v1.json",
+  "version": 1,
+  "context": {
+    "default": {
+      "decryptSecret": {
+        "fromEnv": "GIT_SECRETS_TEST"
+      },
+      "secrets": {
+        "test": "l5sqnu8UkO+PdW2fZo7IMhfHng7lf6XNXEfRhQ/fvboP1HqcRFcu",
+        "test2": "jgsBrbR63TbR3gr7hqPcOdEhaCgooFy3rC6ezusRZnDZ"
+      }
+    }
+  }
+}

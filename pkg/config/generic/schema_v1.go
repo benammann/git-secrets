@@ -242,13 +242,10 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string, globalConfig *global
 }
 
 func getSecretResolverV1(val *V1DecryptSecret, defaultContext *Context, globalConfig *global_config.GlobalConfigProvider, overwrittenSecrets map[string]string) encryption.SecretResolver {
-	if val == nil {
-		return defaultContext.SecretResolver
-	}
-	if val.FromEnv != "" {
+	if val != nil && val.FromEnv != "" {
 		return encryption.NewEnvSecretResolver(val.FromEnv)
 	}
-	if val.FromName != "" {
+	if val != nil && val.FromName != "" {
 		return encryption.NewMergedSecretResolver(val.FromName, globalConfig, overwrittenSecrets)
 	}
 	return defaultContext.SecretResolver

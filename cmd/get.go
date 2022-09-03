@@ -19,8 +19,8 @@ var getConfigCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Get a config entry from the config file",
 	Example: `
-git-secrets get config <configKey>
-git-secrets get config <configKey> -c prod
+git secrets get config <configKey>
+git secrets get config <configKey> -c prod
 `,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		cobra.CheckErr(projectCfgError)
@@ -41,8 +41,8 @@ var getSecretCmd = &cobra.Command{
 	Use:   "secret",
 	Short: "Get and decode a secret entry from the config file",
 	Example: `
-git-secrets get secret <secretName>
-git-secrets get secret <secretName> -c prod
+git secrets get secret <secretName>
+git secrets get secret <secretName> -c prod
 `,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		cobra.CheckErr(projectCfgError)

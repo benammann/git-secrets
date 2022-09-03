@@ -12,10 +12,13 @@ import (
 //go:embed test_fs
 var testFiles embed.FS
 
+type TestFile string
+
 const GlobalSecretKey = "gitSecretsTest"
 const GlobalSecretValue = "eeSaoghoh8oi9leed7hai4looK3jae1N"
 
 const TestFileBlankDefault = "generic_repository_test-blank-default.json"
+const TestFileBlankDefaultFromEnv = "generic_repository_test-blank-default-from-env.json"
 const TestFileBlankTwoContexts = "generic_repository_test-blank-two-contexts.json"
 const TestFileBlankInvalidVersion = "generic_repository_test-generic_repository_test-invalid-version.json"
 const TestFileConfigEntries = "generic_repository_test-config-entries.json"

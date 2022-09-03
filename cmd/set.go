@@ -20,8 +20,8 @@ var setConfigCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Set a config entry",
 	Example: `
-git-secrets set config <configKey> <configValue>
-git-secrets set config <configKey> <configValue> -c prod
+git secrets set config <configKey> <configValue>
+git secrets set config <configKey> <configValue> -c prod
 `,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		cobra.CheckErr(projectCfgError)
@@ -33,7 +33,7 @@ git-secrets set config <configKey> <configValue> -c prod
 		configWrite := projectCfg.GetConfigWriter()
 		cobra.CheckErr(configWrite.SetConfig(projectCfg.GetCurrent().Name, configKey, configValue, force))
 		fmt.Printf("The config entry %s has been written\n", configKey)
-		fmt.Printf("Resolve the value: git-secrets get config %s\n", configKey)
+		fmt.Printf("Resolve the value: git secrets get config %s\n", configKey)
 		fmt.Printf("Use it in a template: MY_CONFIG_KEY={{.Configs.%s}}\n", configKey)
 	},
 }
@@ -43,8 +43,8 @@ var setSecretCmd = &cobra.Command{
 	Use:   "secret",
 	Short: "Encode and write a secret to the config file",
 	Example: `
-git-secrets set secret <secretKey>: Encodes the secret using interactive ui and adds it to the git-secrets file
-git-secrets set secret <secretKey> --value <plainValue>: INSECURE: Uses the value directly from the --value parameter
+git secrets set secret <secretKey>: Encodes the secret using interactive ui and adds it to the git secrets file
+git secrets set secret <secretKey> --value <plainValue>: INSECURE: Uses the value directly from the --value parameter
 `,
 	Args: cobra.ExactArgs(1),
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
@@ -71,7 +71,7 @@ git-secrets set secret <secretKey> --value <plainValue>: INSECURE: Uses the valu
 		cobra.CheckErr(errWrite)
 
 		fmt.Printf("The secret %s has been written\n", secretKey)
-		fmt.Printf("Resolve the decoded value: git-secrets get secret %s\n", secretKey)
+		fmt.Printf("Resolve the decoded value: git secrets get secret %s\n", secretKey)
 		fmt.Printf("Use it in a template: MY_CONFIG_KEY={{.Secrets.%s}}\n", secretKey)
 
 	},

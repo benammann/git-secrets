@@ -18,7 +18,7 @@ var addCmd = &cobra.Command{
 var addContextCmd = &cobra.Command{
 	Use:     "context",
 	Short:   "Add a context to the config file",
-	Example: "git-secrets add context <contextName>",
+	Example: "git secrets add context <contextName>",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		cobra.CheckErr(projectCfgError)
 	},
@@ -30,8 +30,8 @@ var addContextCmd = &cobra.Command{
 		cobra.CheckErr(errAdd)
 		fmt.Printf("The context %s has been added to your config file\n", contextToAdd)
 		fmt.Printf("Now use it using the --context %s or -c %s flag\n", contextToAdd, contextToAdd)
-		fmt.Printf("Add a config to this context: git-secrets set config <configKey> <configValue> -c %s\n", contextToAdd)
-		fmt.Printf("Add a secret to this context: git-secrets set secret <secretKey> -c %s\n", contextToAdd)
+		fmt.Printf("Add a config to this context: git secrets set config <configKey> <configValue> -c %s\n", contextToAdd)
+		fmt.Printf("Add a secret to this context: git secrets set secret <secretKey> -c %s\n", contextToAdd)
 	},
 }
 
@@ -40,8 +40,8 @@ var addFileCmd = &cobra.Command{
 	Use:   "file",
 	Short: "Add a file to the rendering engine",
 	Example: `
-git-secrets add file <fileIn> <fileOut>
-git-secrets add file <fileIn> <fileOut> -c prod
+git secrets add file <fileIn> <fileOut>
+git secrets add file <fileIn> <fileOut> -c prod
 `,
 	Args: cobra.ExactArgs(2),
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
@@ -56,7 +56,7 @@ git-secrets add file <fileIn> <fileOut> -c prod
 		configWrite := projectCfg.GetConfigWriter()
 		cobra.CheckErr(configWrite.AddFileToRender(targetName, fileIn, fileOut))
 		fmt.Printf("Render File %s/%s has been added to your config file.\n", fileIn, fileOut)
-		fmt.Printf("To render the file use: git-secrets render %s or git-secrets render %s -c <contextName>\n", targetName, targetName)
+		fmt.Printf("To render the file use: git secrets render %s or git secrets render %s -c <contextName>\n", targetName, targetName)
 	},
 }
 
