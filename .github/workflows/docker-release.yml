@@ -27,14 +27,14 @@ jobs:
           resource: config
           name: crUser
           decryptSecretName: gitsecretspublic
-          decryptSecretValue: ${{ secrets.GIT_SECRETS_PUBLIC_DEFAULT }}
+          decryptSecretValue: ${{ secrets.GIT_SECRETS_PUBLIC_DEFAULT_NEW }}
       - name: Set docker token
         uses: benammann/git-secrets-get-secret-action@v1
         id: docker_token
         with:
           name: crToken
           decryptSecretName: gitsecretspublic
-          decryptSecretValue: ${{ secrets.GIT_SECRETS_PUBLIC_DEFAULT }}
+          decryptSecretValue: ${{ secrets.GIT_SECRETS_PUBLIC_DEFAULT_NEW }}
       - name: Remove ref from tag
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Remove v from release version
