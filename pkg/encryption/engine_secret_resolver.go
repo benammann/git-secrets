@@ -34,7 +34,7 @@ func (m *MergedSecretResolver) GetPlainSecret() (secret []byte, errResolve error
 
 }
 
-func NewMergedSecretResolver(requestedSecretName string, globalConfig *global_config.GlobalConfigProvider, overwrites map[string]string) SecretResolver {
+func NewMergedSecretResolver(requestedSecretName string, globalConfig *global_config.GlobalConfigProvider, overwrites map[string]string) *MergedSecretResolver {
 	return &MergedSecretResolver{
 		requestedSecretName: requestedSecretName,
 		globalConfig:        globalConfig,
@@ -47,7 +47,7 @@ type FromEnvSecretResolver struct {
 	envName string
 }
 
-func NewEnvSecretResolver(envName string) SecretResolver {
+func NewEnvSecretResolver(envName string) *FromEnvSecretResolver {
 	return &FromEnvSecretResolver{
 		envName: envName,
 	}

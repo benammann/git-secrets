@@ -12,7 +12,7 @@ type AesEngine struct {
 	secretResolver SecretResolver
 }
 
-func NewAesEngine(secretResolver SecretResolver) Engine {
+func NewAesEngine(secretResolver SecretResolver) *AesEngine {
 	return &AesEngine{
 		secretResolver: secretResolver,
 	}
