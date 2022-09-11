@@ -119,12 +119,12 @@ DATABASE_PASSWORD={{.Secrets.databasePassword}}
 You can have custom renderTargets to render files. For example `env` or `k8s`. You can than add multiple files to a renderTargets.
 
 ````bash
-# always render .env.dist to .env
+# always render empty.dist to .env
 # uses the targetName: env
-git secrets add file .env.dist .env -t env
+git secrets add file empty.dist .env -t env
 
 # now execute the rendering process
-# this renders the .env.dist file to .env and fills out all variables using the default context
+# this renders the empty.dist file to .env and fills out all variables using the default context
 # targetName: env
 git secrets render env
 

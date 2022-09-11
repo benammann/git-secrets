@@ -1,0 +1,20 @@
+{{$hello := "Hello World"}}{
+  "context": {
+    "ContextName": "{{.ContextName}}",
+    "File": {
+      "FileIn": "{{.File.FileIn}}",
+      "FileOut": "{{.File.FileOut}}"
+    },
+    "Secrets": {
+      "databasePassword": "{{.Secrets.databasePassword}}"
+    },
+    "Configs": {
+      "databasePort": "{{.Configs.databasePort}}"
+    }
+  },
+  "functions": {
+    "base64Encode": "{{Base64Encode $hello}}",
+    "gitConfig": "{{GitConfig "user.name"}}"
+  }
+}
+

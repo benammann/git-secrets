@@ -1,0 +1,28 @@
+{
+  "$schema": "https://raw.githubusercontent.com/benammann/git-secrets/dev-beta/schema/def/v1.json",
+  "version": 1,
+  "context": {
+    "default": {
+      "decryptSecret": {
+        "fromName": "gitsecretstest"
+      },
+      "secrets": {
+        "databasePassword": "NkUBz4cXXAHkz23ygUZzgR0K+sBTzhPqtws+Jib1s9WXzCl8Iz05CI4ywaBHWJh3XzLnI8c9eG4qauIc"
+      },
+      "configs": {
+        "databasePort": "3306"
+      }
+    },
+    "prod": {}
+  },
+  "renderFiles": {
+    "test-render-all": {
+      "files": [
+        {
+          "fileIn": "templates/render-context.json",
+          "fileOut": "out/render-context.json"
+        }
+      ]
+    }
+  }
+}

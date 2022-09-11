@@ -155,6 +155,6 @@ func resolveContext() {
 
 func createRenderingEngine() {
 	if projectCfg != nil {
-		renderingEngine = render.NewRenderingEngine(projectCfg)
+		renderingEngine = render.NewRenderingEngine(projectCfg, fs, fs)
 	}
 }

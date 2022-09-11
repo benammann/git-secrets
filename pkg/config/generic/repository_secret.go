@@ -121,8 +121,8 @@ func (s *Secret) Decode() (string, error) {
 	return s.OriginContext.DecodeValue(s.EncodedValue)
 }
 
-// DecodeSecrets decodes the secrets of the current context and puts them into a map[string]string
-func (c *Repository) DecodeSecrets() (SecretsMap, error) {
+// GetSecretsMapDecoded decodes the secrets of the current context and puts them into a map[string]string
+func (c *Repository) GetSecretsMapDecoded() (SecretsMap, error) {
 
 	// create the secrets map
 	secretsMap := make(SecretsMap)

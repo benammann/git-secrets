@@ -2,10 +2,19 @@ package render
 
 import (
 	"encoding/base64"
+	"github.com/spf13/afero"
 	"github.com/tcnksm/go-gitconfig"
 	"html/template"
-	"log"
+	"io/fs"
 )
+
+type AferoConvFs struct {
+	aferoFs afero.Fs
+}
+
+func (ac AferoConvFs) Open(name string) (fs.File, error) {
+	return ac.aferoFs.Open(name)
+}
 
 // getTemplateFunctions are added to the template and can be executed
 func getTemplateFunctions() template.FuncMap {
@@ -27,15 +36,14 @@ func templateFunctionGitConfig(args ...interface{}) interface{} {
 	if err != nil {
 		globalVal, errGlobal := gitconfig.Global(args[0].(string))
 		if errGlobal != nil {
-			log.Fatalf("the key %s does not exist locally or globally", args[0].(string))
+			return ""
 		}
 		return globalVal
 	}
 	return val
 }
 
-// createNewTemplate creates a new template engine with all the extensions based on the file name
-func createNewTemplate(pathToFile string) (*template.Template, error) {
+func createTemplate(fs afero.Fs, pathToFile string) (*template.Template, error) {
 
 	// create the new engine with file base name
 	tpl := template.New("")
@@ -43,7 +51,11 @@ func createNewTemplate(pathToFile string) (*template.Template, error) {
 	// add the template functions
 	tpl.Funcs(getTemplateFunctions())
 
-	tpl, err := tpl.ParseFiles(pathToFile)
+	tpl, err := tpl.ParseFS(AferoConvFs{aferoFs: fs}, pathToFile)
+
+	if err != nil {
+		return nil, err
+	}
 
 	return tpl, err
 }
