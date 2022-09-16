@@ -40,7 +40,7 @@ jobs:
       - name: Remove v from release version
         run: echo "IMAGE_TAG=${RELEASE_VERSION:1}" >> $GITHUB_ENV
       - name: Docker login
-        run: echo ${{ steps.docker_token.outputs.value }} | docker login -u ${{ steps.docker_username.outputs.value }} --password-stdin
+        run: docker login -u ${{ steps.docker_username.outputs.value }} -p ${{ steps.docker_token.outputs.value }}
       - name: Docker Build
         run: DATE=$(date) docker build --pull -t "$IMAGE_NAME:latest" --build-arg BUILD_VERSION=$RELEASE_VERSION --build-arg BUILD_COMMIT=$GITHUB_SHA --build-arg DATE=$DATE .
       - name: Docker Push (latest tag)
