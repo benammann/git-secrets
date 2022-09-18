@@ -8,6 +8,7 @@ import (
 )
 
 const SecretKeyPrefix = "secrets"
+const GcpCredentialsPrefix = "gcp.credentials"
 
 type GlobalConfigProvider struct {
 	storageProvider StorageProvider
@@ -21,6 +22,10 @@ func NewGlobalConfigProvider(storageProvider StorageProvider) *GlobalConfigProvi
 
 func (g *GlobalConfigProvider) GetSecret(secretKey string) (value string) {
 	return g.storageProvider.GetString(g.secretConfigKey(secretKey))
+}
+
+func (g *GlobalConfigProvider) GetGcpCredentialsFile(credentialsName string) string {
+	return g.storageProvider.GetString(g.gcpCredentialsKey(credentialsName))
 }
 
 func (g *GlobalConfigProvider) SetSecret(secretKey string, secretValue string, force bool) error {
@@ -42,6 +47,22 @@ func (g *GlobalConfigProvider) SetSecret(secretKey string, secretValue string, f
 	return g.storageProvider.WriteConfig()
 }
 
+func (g *GlobalConfigProvider) SetGcpCredentials(credentialsName string, pathToFile string, force bool) error {
+
+
+	configKey := g.gcpCredentialsKey(credentialsName)
+
+	exists := g.GetGcpCredentialsFile(credentialsName) != ""
+	if exists && force == false {
+		return fmt.Errorf("gcp credentials %s already exists. use --force to overwrite", configKey)
+	}
+
+	g.storageProvider.Set(configKey, pathToFile)
+
+	return g.storageProvider.WriteConfig()
+
+}
+
 func (g *GlobalConfigProvider) GetSecretKeys() []string {
 	var secretKeys []string
 	for _, key := range g.storageProvider.AllKeys() {
@@ -56,6 +77,10 @@ func (g *GlobalConfigProvider) GetSecretKeys() []string {
 
 func (g *GlobalConfigProvider) secretConfigKey(secretKey string) string {
 	return fmt.Sprintf("%s.%s", SecretKeyPrefix, strings.ToLower(secretKey))
+}
+
+func (g *GlobalConfigProvider) gcpCredentialsKey(credentialsName string) string {
+	return fmt.Sprintf("%s.%s", GcpCredentialsPrefix, strings.ToLower(credentialsName))
 }
 
 func (g *GlobalConfigProvider) validateSecret(secretKey string, secretValue string) error {

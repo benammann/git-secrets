@@ -19,6 +19,9 @@
           "description": "The default context, you can specify the context by using -c <context-name>",
           "type": "object",
           "properties": {
+            "gcpCredentials": {
+              "type": "string"
+            },
             "decryptSecret": {
               "type": "object",
               "description": "How to decode the secrets, available: fromName or fromEnv\nYou can only use one\nYou can also overwrite the decodeSecret method in another context\nSo you can use another secret encoding for your production secrets to protect them from the developers for example",
@@ -47,8 +50,33 @@
               "description": "Specify your secrets here",
               "patternProperties": {
                 ".*": {
-                  "description": "Encode them via git-secrets encode <value-to-encode> and them copy them here\nAvailable in the template via {{.Secrets.secretName}}",
-                  "type": "string"
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "encrypted": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string",
+                              "required": ["value"]
+                            }
+                          }
+                        },
+                        "gcp": {
+                          "type": "object",
+                          "properties": {
+                            "resourceId": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               }
             },
@@ -73,6 +101,9 @@
           "description": "This is a custom context, you can specify the context by using -c <context-name>",
           "type": "object",
           "properties": {
+            "gcpCredentials": {
+              "type": "string"
+            },
             "decryptSecret": {
               "type": "object",
               "description": "How to decode the secrets, available: fromName or fromEnv\nYou can only use one\nYou can also overwrite the decodeSecret method in another context\nSo you can use another secret encoding for your production secrets to protect them from the developers for example",
@@ -98,11 +129,28 @@
             },
             "secrets": {
               "type": "object",
-              "description": "Allows to overwrite secrets from the default context",
+              "description": "Specify your secrets here",
               "patternProperties": {
                 ".*": {
-                  "description": "This secret overwrites the secret from the default context",
-                  "type": "string"
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "encrypted": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string",
+                              "required": ["value"]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               }
             },

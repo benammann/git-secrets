@@ -15,7 +15,7 @@ import (
 )
 
 type DecodedSecret struct {
-	secret       *config_generic.Secret
+	secret       config_generic.Secret
 	decodedValue string
 }
 
@@ -48,9 +48,9 @@ var scanCmd = &cobra.Command{
 		for _, context := range projectCfg.GetContexts() {
 			contextSecrets := projectCfg.GetSecretsByContext(context.Name)
 			for _, secret := range contextSecrets {
-				decodedValue, errDecode := secret.Decode()
+				decodedValue, errDecode := secret.GetPlainValue()
 				if errDecode != nil {
-					color.Yellow("Warning: could not decode secret %s from context %s, skipping this secret\n", secret.Name, secret.OriginContext.Name)
+					color.Yellow("Warning: could not decode secret %s from context %s, skipping this secret\n", secret.GetName(), secret.GetOriginContext().Name)
 					continue
 				}
 				decodedSecrets = append(decodedSecrets, &DecodedSecret{secret: secret, decodedValue: decodedValue})
@@ -149,7 +149,7 @@ var scanCmd = &cobra.Command{
 			}
 
 			for _, leakedSecret := range leakedSecrets {
-				fmt.Printf("%s:%s - secret %s from context %s is present\n", red(leakedSecret.fileName), yellow(leakedSecret.line), yellow(leakedSecret.secret.secret.Name), yellow(leakedSecret.secret.secret.OriginContext.Name))
+				fmt.Printf("%s:%s - secret %s from context %s is present\n", red(leakedSecret.fileName), yellow(leakedSecret.line), yellow(leakedSecret.secret.secret.GetName()), yellow(leakedSecret.secret.secret.GetOriginContext().Name))
 				fmt.Printf("%s%d | %s\n\n", yellow("> "), leakedSecret.line, leakedSecret.lineContent)
 			}
 

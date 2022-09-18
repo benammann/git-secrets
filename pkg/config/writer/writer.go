@@ -1,7 +1,8 @@
 package writer
 
 type ConfigWriter interface {
-	SetSecret(contextName string, secretName string, secretEncodedValue string, force bool) error
+	SetEncryptedSecret(contextName string, secretName string, secretEncodedValue string, force bool) error
+	SetGcpSecret(contextName string, secretName string, resourceId string, force bool) error
 	SetConfig(contextName string, configName string, configValue string, force bool) error
 	AddContext(contextName string) error
 	AddFileToRender(targetName string, fileIn string, fileOut string) error

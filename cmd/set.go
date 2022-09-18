@@ -67,7 +67,8 @@ git secrets set secret <secretKey> --value <plainValue>: INSECURE: Uses the valu
 		cobra.CheckErr(errEncode)
 
 		writer := projectCfg.GetConfigWriter()
-		errWrite := writer.SetSecret(projectCfg.GetCurrent().Name, secretKey, encodedValue, force)
+
+		errWrite := writer.SetEncryptedSecret(projectCfg.GetCurrent().Name, secretKey, encodedValue, force)
 		cobra.CheckErr(errWrite)
 
 		fmt.Printf("The secret %s has been written\n", secretKey)
