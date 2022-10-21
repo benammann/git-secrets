@@ -61,7 +61,7 @@ git secrets info -d -c prod: Decodes all secrets from the prod context
 
 		shouldDecode, _ := cmd.Flags().GetBool(InfoCmdFlagDecode)
 
-		tableHeader := []string{"Secret Name", "Origin Context"}
+		tableHeader := []string{"Type", "Secret Name", "Origin Context"}
 		if shouldDecode {
 			tableHeader = append(tableHeader, "Decoded Value")
 		}
@@ -70,9 +70,9 @@ git secrets info -d -c prod: Decodes all secrets from the prod context
 
 		for _, secret := range projectCfg.GetCurrentSecrets() {
 
-			tableRow := []string{secret.GetName(), secret.GetOriginContext().Name}
+			tableRow := []string{secret.GetType(), secret.GetName(), secret.GetOriginContext().Name}
 			if shouldDecode {
-				decodedValue, errDecode := secret.GetPlainValue()
+				decodedValue, errDecode := secret.GetPlainValue(cmd.Context())
 				if errDecode != nil {
 					fmt.Printf("Could not decode %s: %s\n", secret.GetName(), errDecode.Error())
 					continue

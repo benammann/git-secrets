@@ -2,6 +2,7 @@ package config_generic
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
 	"github.com/spf13/afero"
@@ -51,7 +52,35 @@ func (v *V1Writer) SetEncryptedSecret(contextName string, secretName string, sec
 }
 
 func (v *V1Writer) SetGcpSecret(contextName string, secretName string, resourceId string, force bool) error {
-	return nil
+
+	if v.schema.Context[config_const.DefaultContextName].GcpCredentials == "" {
+		return errors.New("you need to specify a gcp credentials first")
+	}
+
+	if v.schema.Context[contextName] == nil {
+		return fmt.Errorf("the context %s does not exist", contextName)
+	}
+
+	if v.schema.Context[contextName].Secrets == nil {
+		v.schema.Context[contextName].Secrets = make(map[string]*SecretEntryTypes)
+	}
+
+	if contextName != config_const.DefaultContextName && v.schema.Context[config_const.DefaultContextName].Secrets[secretName] == nil {
+		return fmt.Errorf("you need to define secret entry %s in the default context first", secretName)
+	}
+
+	if v.schema.Context[contextName].Secrets[secretName] != nil && force == false {
+		return fmt.Errorf("the secret %s does already exist. Use --force to overwrite", secretName)
+	}
+
+	v.schema.Context[contextName].Secrets[secretName] = &SecretEntryTypes{
+		Gcp: &SecretEntryGcp{
+			ResourceId: resourceId,
+		},
+	}
+
+	return v.WriteConfig()
+
 }
 
 func (v *V1Writer) SetConfig(contextName string, configName string, configValue string, force bool) error {

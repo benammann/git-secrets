@@ -48,7 +48,7 @@ var scanCmd = &cobra.Command{
 		for _, context := range projectCfg.GetContexts() {
 			contextSecrets := projectCfg.GetSecretsByContext(context.Name)
 			for _, secret := range contextSecrets {
-				decodedValue, errDecode := secret.GetPlainValue()
+				decodedValue, errDecode := secret.GetPlainValue(cmd.Context())
 				if errDecode != nil {
 					color.Yellow("Warning: could not decode secret %s from context %s, skipping this secret\n", secret.GetName(), secret.GetOriginContext().Name)
 					continue

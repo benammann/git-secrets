@@ -2,6 +2,7 @@ package global_config
 
 import (
 	"fmt"
+	"github.com/AlecAivazis/survey/v2"
 	"regexp"
 	"sort"
 	"strings"
@@ -26,6 +27,27 @@ func (g *GlobalConfigProvider) GetSecret(secretKey string) (value string) {
 
 func (g *GlobalConfigProvider) GetGcpCredentialsFile(credentialsName string) string {
 	return g.storageProvider.GetString(g.gcpCredentialsKey(credentialsName))
+}
+
+func (g *GlobalConfigProvider) SelectGcpCredentialsFile() (string, error) {
+	availableKeys := g.GetGCPCredentialsKeys()
+	if len(availableKeys) < 1 {
+		return "", fmt.Errorf("you need to define at least one gcp credential first")
+	}
+
+	var res string
+	prompt := &survey.Select{
+		Message: "Which credentials to use:",
+		Options: availableKeys,
+	}
+
+	errAsk := survey.AskOne(prompt, &res)
+	if errAsk != nil {
+		return "", errAsk
+	}
+
+	return g.GetGcpCredentialsFile(res), nil
+
 }
 
 func (g *GlobalConfigProvider) SetSecret(secretKey string, secretValue string, force bool) error {
@@ -73,6 +95,18 @@ func (g *GlobalConfigProvider) GetSecretKeys() []string {
 	}
 	sort.Strings(secretKeys)
 	return secretKeys
+}
+
+func (g *GlobalConfigProvider) GetGCPCredentialsKeys() []string {
+	var credentialsKeys []string
+	for _, key := range g.storageProvider.AllKeys() {
+		credentialsPrefix := fmt.Sprintf("%s.", GcpCredentialsPrefix)
+		if strings.HasPrefix(key, credentialsPrefix) {
+			credentialsKeys = append(credentialsKeys, strings.Replace(key, credentialsPrefix, "", 1))
+		}
+	}
+	sort.Strings(credentialsKeys)
+	return credentialsKeys
 }
 
 func (g *GlobalConfigProvider) secretConfigKey(secretKey string) string {

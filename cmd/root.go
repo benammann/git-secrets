@@ -1,16 +1,19 @@
 package cmd
 
 import (
+	"context"
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
 	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
 	global_config "github.com/benammann/git-secrets/pkg/config/global"
 	"github.com/benammann/git-secrets/pkg/render"
+	"github.com/benammann/git-secrets/pkg/utility"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"os"
 	"strings"
-
-	"github.com/spf13/viper"
+	"sync"
+	"time"
 )
 
 var fs = afero.NewOsFs()
@@ -31,7 +34,10 @@ var contextName string
 
 var overwrittenSecrets []string
 
+var waitGroupSize = 0
+
 const FlagValue = "value"
+const FlagResourceId = "resourceId"
 const FlagForce = "force"
 const FlagDebug = "debug"
 const FlagDryRun = "dry-run"
@@ -64,7 +70,37 @@ func Execute(buildVersion string, buildCommit string, buildDate string) {
 	version = buildVersion
 	commit = buildCommit
 	date = buildDate
-	cobra.CheckErr(rootCmd.Execute())
+
+	ctx := utility.NewChannelContext()
+	addChannel, doneChannel := utility.GetContextChannels(ctx)
+	ctx, cancel := context.WithCancel(ctx)
+
+	var waitGroup sync.WaitGroup
+	timeout, _ := context.WithTimeout(context.Background(), time.Second * 5)
+
+	go func() {
+		for {
+			select {
+			case val := <-addChannel:
+				waitGroupSize = waitGroupSize + val
+				waitGroup.Add(val)
+			case <-doneChannel:
+				waitGroup.Done()
+				waitGroupSize--
+			case <-timeout.Done():
+				for waitGroupSize > 0 {
+					waitGroup.Done()
+					waitGroupSize--
+				}
+			}
+		}
+	}()
+
+	cobra.CheckErr(rootCmd.ExecuteContext(ctx))
+	cancel()
+
+	waitGroup.Wait()
+
 }
 
 func init() {

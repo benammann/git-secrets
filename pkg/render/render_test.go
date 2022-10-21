@@ -7,6 +7,7 @@ import (
 	"fmt"
 	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
 	global_config "github.com/benammann/git-secrets/pkg/config/global"
+	"github.com/benammann/git-secrets/pkg/utility"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -72,10 +73,10 @@ func TestRenderingEngine_CreateRenderingContext(t *testing.T) {
 	}
 
 	dbPassword := repo.GetCurrentSecret("databasePassword")
-	dbPasswordVal, errDecode := dbPassword.Decode()
+	dbPasswordVal, errDecode := dbPassword.GetPlainValue(utility.NewChannelContext())
 	assert.NoError(t, errDecode)
 
-	ctx, err := engine.CreateRenderingContext(file)
+	ctx, err := engine.CreateRenderingContext(utility.NewChannelContext(), file)
 	assert.NoError(t, err)
 	assert.Equal(t, "default", ctx.ContextName)
 	assert.Equal(t, dbPasswordVal, ctx.Secrets["databasePassword"])
@@ -89,7 +90,7 @@ func TestRenderingEngine_ExecuteTemplate(t *testing.T) {
 	}
 
 	var bytesOut bytes.Buffer
-	usedContext, errExecute := engine.ExecuteTemplate(fileToRender, &bytesOut)
+	usedContext, errExecute := engine.ExecuteTemplate(utility.NewChannelContext(), fileToRender, &bytesOut)
 	assert.NoError(t, errExecute)
 	assert.NotNil(t, usedContext)
 
@@ -115,7 +116,7 @@ func TestRenderingEngine_RenderFile(t *testing.T) {
 	fileToRender := &config_generic.FileToRender{
 		FileIn: "test_fs/templates/render-context.json",
 	}
-	_, fileContents, err := engine.RenderFile(fileToRender)
+	_, fileContents, err := engine.RenderFile(utility.NewChannelContext(), fileToRender)
 	assert.NoError(t, err)
 	assert.NotEqual(t, "", fileContents)
 }
@@ -127,7 +128,7 @@ func TestRenderingEngine_WriteFile(t *testing.T) {
 		FileOut: "render-context.json",
 	}
 	engine.fsOut = afero.NewMemMapFs()
-	_, err := engine.WriteFile(fileToRender)
+	_, err := engine.WriteFile(utility.NewChannelContext(), fileToRender)
 	assert.NoError(t, err)
 
 	fileExists, errExists := afero.Exists(engine.fsOut, fileToRender.FileOut)

@@ -2,6 +2,7 @@ package render
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	config_generic "github.com/benammann/git-secrets/pkg/config/generic"
 	"github.com/spf13/afero"
@@ -37,10 +38,10 @@ func (e *RenderingEngine) createTemplate(fileIn string) (*template.Template, err
 }
 
 // CreateRenderingContext creates the context which is used in the templates
-func (e *RenderingEngine) CreateRenderingContext(fileToRender *config_generic.FileToRender) (*RenderingContext, error) {
+func (e *RenderingEngine) CreateRenderingContext(ctx context.Context, fileToRender *config_generic.FileToRender) (*RenderingContext, error) {
 
 	// decode the secrets
-	secretsMap, errSecrets := e.repository.GetSecretsMapDecoded()
+	secretsMap, errSecrets := e.repository.GetSecretsMapDecoded(ctx)
 	if errSecrets != nil {
 		return nil, fmt.Errorf("could not create context secrets: %s", errSecrets.Error())
 	}
@@ -58,10 +59,10 @@ func (e *RenderingEngine) CreateRenderingContext(fileToRender *config_generic.Fi
 }
 
 // RenderFile renders the file and returns the rendered contents as string
-func (e *RenderingEngine) RenderFile(fileToRender *config_generic.FileToRender) (usedContext *RenderingContext, fileContents string, err error) {
+func (e *RenderingEngine) RenderFile(ctx context.Context, fileToRender *config_generic.FileToRender) (usedContext *RenderingContext, fileContents string, err error) {
 
 	var bytesOut bytes.Buffer
-	usedContext, errExecute := e.ExecuteTemplate(fileToRender, &bytesOut)
+	usedContext, errExecute := e.ExecuteTemplate(ctx, fileToRender, &bytesOut)
 	if errExecute != nil {
 		return nil, "", fmt.Errorf("could not execute template: %s", errExecute.Error())
 	}
@@ -71,7 +72,7 @@ func (e *RenderingEngine) RenderFile(fileToRender *config_generic.FileToRender) 
 }
 
 // WriteFile renders the file and writes it to its destination
-func (e *RenderingEngine) WriteFile(fileToRender *config_generic.FileToRender) (usedContext *RenderingContext, err error) {
+func (e *RenderingEngine) WriteFile(ctx context.Context, fileToRender *config_generic.FileToRender) (usedContext *RenderingContext, err error) {
 
 	// open the file
 	fsFileOut, errFsFile := e.fsOut.OpenFile(fileToRender.FileOut, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
@@ -83,7 +84,7 @@ func (e *RenderingEngine) WriteFile(fileToRender *config_generic.FileToRender) (
 	}
 
 	// execute the template and link the file stream
-	usedContext, errExecute := e.ExecuteTemplate(fileToRender, fsFileOut)
+	usedContext, errExecute := e.ExecuteTemplate(ctx, fileToRender, fsFileOut)
 	if errExecute != nil {
 		return usedContext, fmt.Errorf("could not execute template: %s", errExecute.Error())
 	}
@@ -93,10 +94,10 @@ func (e *RenderingEngine) WriteFile(fileToRender *config_generic.FileToRender) (
 }
 
 // ExecuteTemplate executes the template and creates the rendering context
-func (e *RenderingEngine) ExecuteTemplate(fileToRender *config_generic.FileToRender, writer io.Writer) (usedContext *RenderingContext, err error) {
+func (e *RenderingEngine) ExecuteTemplate(ctx context.Context, fileToRender *config_generic.FileToRender, writer io.Writer) (usedContext *RenderingContext, err error) {
 
 	// create the rendering context
-	usedContext, err = e.CreateRenderingContext(fileToRender)
+	usedContext, err = e.CreateRenderingContext(ctx, fileToRender)
 	if err != nil {
 		return nil, fmt.Errorf("could not create rendering context: %s", err.Error())
 	}

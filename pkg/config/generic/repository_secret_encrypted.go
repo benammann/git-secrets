@@ -1,5 +1,6 @@
 package config_generic
 
+import "context"
 
 func NewEncryptedSecret(name string, encodedValue string, originContext *Context) *EncryptedSecret {
 	return &EncryptedSecret{
@@ -21,6 +22,10 @@ type EncryptedSecret struct {
 	OriginContext *Context
 }
 
+func (s *EncryptedSecret) GetType() string {
+	return "encrypted"
+}
+
 func (s *EncryptedSecret) GetName() string {
 	return s.Name
 }
@@ -29,7 +34,7 @@ func (s *EncryptedSecret) GetOriginContext() *Context {
 	return s.OriginContext
 }
 
-func (s *EncryptedSecret) GetPlainValue() (string, error) {
+func (s *EncryptedSecret) GetPlainValue(ctx context.Context) (string, error) {
 	return s.OriginContext.DecodeValue(s.EncodedValue)
 }
 

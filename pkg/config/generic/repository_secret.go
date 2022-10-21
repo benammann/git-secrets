@@ -1,15 +1,17 @@
 package config_generic
 
 import (
+	"context"
 	"fmt"
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
 	"sort"
 )
 
 type Secret interface {
+	GetType() string
 	GetName() string
 	GetOriginContext() *Context
-	GetPlainValue() (string, error)
+	GetPlainValue(ctx context.Context) (string, error)
 }
 
 // AddSecret adds a secret to the repository
@@ -114,14 +116,14 @@ func (c *Repository) GetCurrentSecret(secretName string) Secret {
 }
 
 // GetSecretsMapDecoded decodes the secrets of the current context and puts them into a map[string]string
-func (c *Repository) GetSecretsMapDecoded() (SecretsMap, error) {
+func (c *Repository) GetSecretsMapDecoded(ctx context.Context) (SecretsMap, error) {
 
 	// create the secrets map
 	secretsMap := make(SecretsMap)
 
 	// decode each secret
 	for _, secret := range c.GetCurrentSecrets() {
-		decodedSecret, errDecode := secret.GetPlainValue()
+		decodedSecret, errDecode := secret.GetPlainValue(ctx)
 		if errDecode != nil {
 			return nil, fmt.Errorf("could not decode secret %s: %s", secret.GetName(), errDecode.Error())
 		}

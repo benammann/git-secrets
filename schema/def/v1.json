@@ -144,6 +144,14 @@
                               "required": ["value"]
                             }
                           }
+                        },
+                        "gcp": {
+                          "type": "object",
+                          "properties": {
+                            "resourceId": {
+                              "type": "string"
+                            }
+                          }
                         }
                       }
                     },

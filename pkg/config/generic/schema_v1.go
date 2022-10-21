@@ -227,7 +227,11 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string, globalConfig *global
 	for _, context := range contexts {
 		context.SecretResolver = getSecretResolverV1(Parsed.Context[context.Name].DecryptSecret, defaultContext, globalConfig, overwrittenSecrets)
 		context.Encryption = encryption.NewAesEngine(context.SecretResolver)
-		context.GcpCredentials = Parsed.Context[context.Name].GcpCredentials
+		if gcpCredentials := Parsed.Context[context.Name].GcpCredentials; gcpCredentials != "" {
+			context.GcpCredentials = gcpCredentials
+		} else {
+			context.GcpCredentials = defaultContext.GcpCredentials
+		}
 	}
 
 	if Parsed.RenderFiles != nil {
