@@ -6,6 +6,7 @@
 <img src="https://github.com/benammann/git-secrets/actions/workflows/goreleaser.yml/badge.svg" />
 <img src="https://github.com/benammann/git-secrets/actions/workflows/docker-release.yml/badge.svg" />
 <a href='https://coveralls.io/github/benammann/git-secrets?branch=dev-beta'><img src='https://coveralls.io/repos/github/benammann/git-secrets/badge.svg?branch=dev-beta' alt='Coverage Status' /></a>
+<img src="https://img.shields.io/github/downloads/benammann/git-secrets/total" />
 <img src="https://img.shields.io/github/license/benammann/git-secrets" />
 <br/>
 <br/>
