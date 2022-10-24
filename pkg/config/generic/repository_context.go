@@ -12,7 +12,6 @@ type Context struct {
 	Name             string
 	GlobalConfig 	 *global_config.GlobalConfigProvider
 	SecretResolver   encryption.SecretResolver
-	GcpCredentials   string
 	Encryption encryption.Engine
 	Secrets    map[string]Secret
 	Configs    map[string]string

@@ -2,7 +2,6 @@ package config_generic
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
 	"github.com/spf13/afero"
@@ -52,10 +51,6 @@ func (v *V1Writer) SetEncryptedSecret(contextName string, secretName string, sec
 }
 
 func (v *V1Writer) SetGcpSecret(contextName string, secretName string, resourceId string, force bool) error {
-
-	if v.schema.Context[config_const.DefaultContextName].GcpCredentials == "" {
-		return errors.New("you need to specify a gcp credentials first")
-	}
 
 	if v.schema.Context[contextName] == nil {
 		return fmt.Errorf("the context %s does not exist", contextName)

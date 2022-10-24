@@ -45,7 +45,6 @@ type V1DecryptSecret struct {
 
 type V1ContextAwareSecrets struct {
 	DecryptSecret *V1DecryptSecret  `json:"decryptSecret,omitempty"`
-	GcpCredentials string `json:"gcpCredentials,omitempty"`
 	Secrets       map[string]*SecretEntryTypes `json:"secrets,omitempty"`
 	Configs       map[string]string `json:"configs,omitempty"`
 }
@@ -227,11 +226,6 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string, globalConfig *global
 	for _, context := range contexts {
 		context.SecretResolver = getSecretResolverV1(Parsed.Context[context.Name].DecryptSecret, defaultContext, globalConfig, overwrittenSecrets)
 		context.Encryption = encryption.NewAesEngine(context.SecretResolver)
-		if gcpCredentials := Parsed.Context[context.Name].GcpCredentials; gcpCredentials != "" {
-			context.GcpCredentials = gcpCredentials
-		} else {
-			context.GcpCredentials = defaultContext.GcpCredentials
-		}
 	}
 
 	if Parsed.RenderFiles != nil {

@@ -19,9 +19,6 @@
           "description": "The default context, you can specify the context by using -c <context-name>",
           "type": "object",
           "properties": {
-            "gcpCredentials": {
-              "type": "string"
-            },
             "decryptSecret": {
               "type": "object",
               "description": "How to decode the secrets, available: fromName or fromEnv\nYou can only use one\nYou can also overwrite the decodeSecret method in another context\nSo you can use another secret encoding for your production secrets to protect them from the developers for example",
@@ -101,9 +98,6 @@
           "description": "This is a custom context, you can specify the context by using -c <context-name>",
           "type": "object",
           "properties": {
-            "gcpCredentials": {
-              "type": "string"
-            },
             "decryptSecret": {
               "type": "object",
               "description": "How to decode the secrets, available: fromName or fromEnv\nYou can only use one\nYou can also overwrite the decodeSecret method in another context\nSo you can use another secret encoding for your production secrets to protect them from the developers for example",

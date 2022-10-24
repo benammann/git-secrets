@@ -1,2 +1,2 @@
 watch:
-	CompileDaemon
+	CompileDaemon --build "go build -o bin/git-secrets ."

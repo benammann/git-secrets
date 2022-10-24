@@ -1,7 +1,6 @@
 package config_generic
 
 import (
-	"fmt"
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
 	"github.com/benammann/git-secrets/pkg/config/writer"
 )
@@ -58,16 +57,4 @@ func (c *Repository) IsDefault() bool {
 // GetConfigWriter returns the current config writer
 func (c *Repository) GetConfigWriter() writer.ConfigWriter {
 	return c.configWriter
-}
-
-func (c *Repository) GetCurrentGCPCredentialsName() (string, error) {
-	defaultCtx := c.GetDefault()
-	currentCtx := c.GetCurrent()
-	if currentCtx.GcpCredentials == "" && defaultCtx.GcpCredentials == "" {
-		return "", fmt.Errorf("there are no gcp credentials configured")
-	}
-	if currentCtx.GcpCredentials != "" {
-		return currentCtx.GcpCredentials, nil
-	}
-	return defaultCtx.GcpCredentials, nil
 }

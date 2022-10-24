@@ -47,9 +47,7 @@ func (s *GcpSecret) GetPlainValue(ctx context.Context) (string, error) {
 		return s.resolvedPayload, nil
 	}
 
-	file := s.OriginContext.GlobalConfig.GetGcpCredentialsFile(s.OriginContext.GcpCredentials)
-
-	resolvedSecret, errResolve := gcp.ResolveSecret(ctx, s.ResourceId, file)
+	resolvedSecret, errResolve := gcp.ResolveSecret(ctx, s.ResourceId)
 
 	if errResolve == nil {
 		s.resolvedPayload = resolvedSecret

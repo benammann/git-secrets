@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/benammann/git-secrets/pkg/gcp"
@@ -106,20 +105,27 @@ git secrets set secret gcp <secretKey> --resourceId <resourceId>: Uses the resou
 		resourceId, _ := cmd.Flags().GetString(FlagResourceId)
 		force, _ := cmd.Flags().GetBool(FlagForce)
 
-		if projectCfg.GetDefault().GcpCredentials == "" {
-			return fmt.Errorf("you need to configure gcp credentials first")
-		}
-		credentialsName, errCredentials := projectCfg.GetCurrentGCPCredentialsName()
-		cobra.CheckErr(errCredentials)
-		credentialsFileName := globalCfg.GetGcpCredentialsFile(credentialsName)
-
 		if resourceId == "" {
-			gcpSecrets, errSecrets := gcp.ListSecrets(cmd.Context(), credentialsFileName)
+
+			projectsList, errProjects := gcp.ListProjects(cmd.Context())
+			cobra.CheckErr(errProjects)
+			project, errAsk := projectsList.AskProject()
+			cobra.CheckErr(errAsk)
+
+			gcpSecrets, errSecrets := gcp.ListSecrets(cmd.Context(), project)
 			cobra.CheckErr(errSecrets)
-			for _, secret := range gcpSecrets {
-				fmt.Println(secret.GetEtag())
-			}
-			cobra.CheckErr(errors.New("selection not supported yet. use --resourceId <resourceId>"))
+
+			secret, errAsk := gcpSecrets.AskSecret()
+			cobra.CheckErr(errAsk)
+
+			secretVersions, errVersions := gcp.ListSecretVersions(cmd.Context(), project, secret)
+			cobra.CheckErr(errVersions)
+
+			version, errAsk := secretVersions.AskSecretVersion()
+			cobra.CheckErr(errAsk)
+
+			resourceId = version.Name
+
 		}
 
 		writer := projectCfg.GetConfigWriter()
