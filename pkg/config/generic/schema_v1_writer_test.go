@@ -181,14 +181,14 @@ func TestV1Writer_SetSecret(t *testing.T) {
 	t.Run("fail if context does not exists", func(t *testing.T) {
 		writer, original, getSchema := NewWrappedV1Writer(t, TestFileRealWorld)
 		assert.Nil(t, original.Context["missing"])
-		assert.Error(t, writer.SetSecret("missing", "databaseHost", "<encryptedValue>", false))
+		assert.Error(t, writer.SetEncryptedSecret("missing", "databaseHost", "<encryptedValue>", false))
 		assert.Nil(t, getSchema().Context["missing"])
 	})
 
 	t.Run("initialize secrets struct", func(t *testing.T) {
 		writer, original, getSchema := NewWrappedV1Writer(t, TestFileConfigEntries)
 		assert.Nil(t, original.Context["default"].Secrets)
-		assert.NoError(t, writer.SetSecret("default", "testKey", "<encryptedValue>", false))
+		assert.NoError(t, writer.SetEncryptedSecret("default", "testKey", "<encryptedValue>", false))
 		assert.NotNil(t, getSchema().Context["default"].Secrets)
 		assert.Equal(t, "<encryptedValue>", getSchema().Context["default"].Secrets["testKey"])
 	})
@@ -197,10 +197,10 @@ func TestV1Writer_SetSecret(t *testing.T) {
 		writer, original, getSchema := NewWrappedV1Writer(t, TestFileRealWorld)
 
 		assert.Equal(t, "prPy40oRzdeFelmL5xVhbadEWNV9puR3/aWTY+gTYXOrT2bksi5GS9lCTKi66A3ePYa0hbwMqXadlDZw", original.Context["default"].Secrets["databasePassword"])
-		assert.Error(t, writer.SetSecret("default", "databasePassword", "<encryptedValue>", false))
+		assert.Error(t, writer.SetEncryptedSecret("default", "databasePassword", "<encryptedValue>", false))
 		assert.Equal(t, "prPy40oRzdeFelmL5xVhbadEWNV9puR3/aWTY+gTYXOrT2bksi5GS9lCTKi66A3ePYa0hbwMqXadlDZw", original.Context["default"].Secrets["databasePassword"])
 
-		assert.NoError(t, writer.SetSecret("default", "databasePassword", "<encryptedValue>", true))
+		assert.NoError(t, writer.SetEncryptedSecret("default", "databasePassword", "<encryptedValue>", true))
 		assert.Equal(t, "<encryptedValue>", getSchema().Context["default"].Secrets["databasePassword"])
 
 	})
@@ -210,13 +210,13 @@ func TestV1Writer_SetSecret(t *testing.T) {
 
 		assert.Equal(t, "", original.Context["default"].Secrets["databaseRootPassword"])
 		assert.Equal(t, "", original.Context["prod"].Secrets["databaseRootPassword"])
-		assert.Error(t, writer.SetSecret("prod", "databaseRootPassword", "<encryptedValue>", false))
+		assert.Error(t, writer.SetEncryptedSecret("prod", "databaseRootPassword", "<encryptedValue>", false))
 		assert.Equal(t, "", getSchema().Context["prod"].Secrets["databaseRootPassword"])
 
-		assert.NoError(t, writer.SetSecret("default", "databaseRootPassword", "<encryptedValue>", false))
+		assert.NoError(t, writer.SetEncryptedSecret("default", "databaseRootPassword", "<encryptedValue>", false))
 		assert.Equal(t, "<encryptedValue>", original.Context["default"].Secrets["databaseRootPassword"])
 
-		assert.NoError(t, writer.SetSecret("prod", "databaseRootPassword", "<encryptedValue1>", false))
+		assert.NoError(t, writer.SetEncryptedSecret("prod", "databaseRootPassword", "<encryptedValue1>", false))
 		assert.Equal(t, "<encryptedValue1>", getSchema().Context["prod"].Secrets["databaseRootPassword"])
 
 	})
@@ -224,10 +224,10 @@ func TestV1Writer_SetSecret(t *testing.T) {
 	t.Run("should write the secret entry", func(t *testing.T) {
 		writer, original, getSchema := NewWrappedV1Writer(t, TestFileRealWorld)
 		assert.Equal(t, "", original.Context["default"].Secrets["databaseRootPassword"])
-		assert.NoError(t, writer.SetSecret("default", "databaseRootPassword", "<encryptedValue>", false))
+		assert.NoError(t, writer.SetEncryptedSecret("default", "databaseRootPassword", "<encryptedValue>", false))
 		assert.Equal(t, "<encryptedValue>", getSchema().Context["default"].Secrets["databaseRootPassword"])
 
-		assert.NoError(t, writer.SetSecret("prod", "databaseRootPassword", "<encryptedValue1>", false))
+		assert.NoError(t, writer.SetEncryptedSecret("prod", "databaseRootPassword", "<encryptedValue1>", false))
 		assert.Equal(t, "<encryptedValue1>", getSchema().Context["prod"].Secrets["databaseRootPassword"])
 	})
 

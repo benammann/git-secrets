@@ -47,8 +47,33 @@
               "description": "Specify your secrets here",
               "patternProperties": {
                 ".*": {
-                  "description": "Encode them via git-secrets encode <value-to-encode> and them copy them here\nAvailable in the template via {{.Secrets.secretName}}",
-                  "type": "string"
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "encrypted": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string",
+                              "required": ["value"]
+                            }
+                          }
+                        },
+                        "gcp": {
+                          "type": "object",
+                          "properties": {
+                            "resourceId": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               }
             },
@@ -98,11 +123,36 @@
             },
             "secrets": {
               "type": "object",
-              "description": "Allows to overwrite secrets from the default context",
+              "description": "Specify your secrets here",
               "patternProperties": {
                 ".*": {
-                  "description": "This secret overwrites the secret from the default context",
-                  "type": "string"
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "encrypted": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string",
+                              "required": ["value"]
+                            }
+                          }
+                        },
+                        "gcp": {
+                          "type": "object",
+                          "properties": {
+                            "resourceId": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               }
             },

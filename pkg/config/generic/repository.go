@@ -32,7 +32,7 @@ type Repository struct {
 	contexts []*Context
 
 	// secrets holds all secrets of all contexts
-	secrets []*Secret
+	secrets []Secret
 
 	// configs holds all configs of all contexts
 	configs []*Config

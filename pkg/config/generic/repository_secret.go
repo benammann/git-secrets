@@ -1,30 +1,28 @@
 package config_generic
 
 import (
+	"context"
 	"fmt"
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
 	"sort"
 )
 
-type Secret struct {
-
-	// Name describes the name of the secret
-	Name string
-
-	// EncodedValue hold the encodedValue in base64 of the secret
-	EncodedValue string
-
-	// OriginContext references the configured context to decode the secret
-	OriginContext *Context
+type Secret interface {
+	GetType() string
+	GetName() string
+	GetOriginContext() *Context
+	GetPlainValue(ctx context.Context) (string, error)
 }
 
 // AddSecret adds a secret to the repository
 // also does some validations
-func (c *Repository) AddSecret(secret *Secret) error {
+func (c *Repository) AddSecret(secret Secret) error {
+
+	secretName, secretContext := secret.GetName(), secret.GetOriginContext()
 
 	// if not default secret we need to check if the given secret is also configured in the default context
 	// because we are not allowed to define variables only in a child context
-	if secret.OriginContext.Name != config_const.DefaultContextName {
+	if secretContext.Name != config_const.DefaultContextName {
 
 		// get all the default secrets
 		defaultSecrets := c.GetSecretsByContext(config_const.DefaultContextName)
@@ -32,7 +30,7 @@ func (c *Repository) AddSecret(secret *Secret) error {
 
 		// check if it defined
 		for _, defaultSecret := range defaultSecrets {
-			if defaultSecret.Name == secret.Name {
+			if defaultSecret.GetName() == secretName {
 				defaultSecretFound = true
 				break
 			}
@@ -40,7 +38,7 @@ func (c *Repository) AddSecret(secret *Secret) error {
 
 		// return error if not defined
 		if defaultSecretFound == false {
-			return fmt.Errorf("secret %s defined in context %s is not defined in the default context", secret.Name, secret.OriginContext.Name)
+			return fmt.Errorf("secret %s defined in context %s is not defined in the default context", secretName, secretContext.Name)
 		}
 
 	}
@@ -50,16 +48,16 @@ func (c *Repository) AddSecret(secret *Secret) error {
 
 	// sort the secrets alphabetically
 	sort.SliceStable(c.secrets, func(i, j int) bool {
-		return c.secrets[i].Name < c.secrets[j].Name
+		return c.secrets[i].GetName() < c.secrets[j].GetName()
 	})
 
 	return nil
 }
 
 // GetSecretsByContext returns all the secrets related to the current context
-func (c *Repository) GetSecretsByContext(contextName string) (res []*Secret) {
+func (c *Repository) GetSecretsByContext(contextName string) (res []Secret) {
 	for _, secret := range c.secrets {
-		if secret.OriginContext.Name == contextName {
+		if secret.GetOriginContext().Name == contextName {
 			res = append(res, secret)
 		}
 	}
@@ -68,7 +66,7 @@ func (c *Repository) GetSecretsByContext(contextName string) (res []*Secret) {
 
 // GetCurrentSecrets merges the default secrets with the context secrets
 // the default secrets are overwritten by the context secrets
-func (c *Repository) GetCurrentSecrets() (res []*Secret) {
+func (c *Repository) GetCurrentSecrets() (res []Secret) {
 
 	// get all default secrets
 	defaultSecrets := c.GetSecretsByContext(config_const.DefaultContextName)
@@ -84,7 +82,7 @@ func (c *Repository) GetCurrentSecrets() (res []*Secret) {
 
 			found := false
 			for _, contextSecret := range contextSecrets {
-				if defaultSecret.Name == contextSecret.Name {
+				if defaultSecret.GetName() == contextSecret.GetName() {
 					found = true
 					break
 				}
@@ -108,32 +106,28 @@ func (c *Repository) GetCurrentSecrets() (res []*Secret) {
 }
 
 // GetCurrentSecret takes the merged secrets from GetCurrentSecrets and returns the needed one
-func (c *Repository) GetCurrentSecret(secretName string) *Secret {
+func (c *Repository) GetCurrentSecret(secretName string) Secret {
 	for _, secret := range c.GetCurrentSecrets() {
-		if secret.Name == secretName {
+		if secret.GetName() == secretName {
 			return secret
 		}
 	}
 	return nil
 }
 
-func (s *Secret) Decode() (string, error) {
-	return s.OriginContext.DecodeValue(s.EncodedValue)
-}
-
 // GetSecretsMapDecoded decodes the secrets of the current context and puts them into a map[string]string
-func (c *Repository) GetSecretsMapDecoded() (SecretsMap, error) {
+func (c *Repository) GetSecretsMapDecoded(ctx context.Context) (SecretsMap, error) {
 
 	// create the secrets map
 	secretsMap := make(SecretsMap)
 
 	// decode each secret
 	for _, secret := range c.GetCurrentSecrets() {
-		decodedSecret, errDecode := secret.Decode()
+		decodedSecret, errDecode := secret.GetPlainValue(ctx)
 		if errDecode != nil {
-			return nil, fmt.Errorf("could not decode secret %s: %s", secret.Name, errDecode.Error())
+			return nil, fmt.Errorf("could not decode secret %s: %s", secret.GetName(), errDecode.Error())
 		}
-		secretsMap[secret.Name] = decodedSecret
+		secretsMap[secret.GetName()] = decodedSecret
 	}
 
 	return secretsMap, nil

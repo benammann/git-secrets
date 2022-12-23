@@ -22,25 +22,57 @@ func NewV1Writer(fs afero.Fs, schema V1Schema, configPath string) *V1Writer {
 	}
 }
 
-func (v *V1Writer) SetSecret(contextName string, secretName string, secretEncodedValue string, force bool) error {
+func (v *V1Writer) SetEncryptedSecret(contextName string, secretName string, secretEncodedValue string, force bool) error {
 
 	if v.schema.Context[contextName] == nil {
 		return fmt.Errorf("the context %s does not exist", contextName)
 	}
 
 	if v.schema.Context[contextName].Secrets == nil {
-		v.schema.Context[contextName].Secrets = make(map[string]string)
+		v.schema.Context[contextName].Secrets = make(map[string]*SecretEntryTypes)
 	}
 
-	if contextName != config_const.DefaultContextName && v.schema.Context[config_const.DefaultContextName].Secrets[secretName] == "" {
+	if contextName != config_const.DefaultContextName && v.schema.Context[config_const.DefaultContextName].Secrets[secretName] == nil {
 		return fmt.Errorf("you need to define secret entry %s in the default context first", secretName)
 	}
 
-	if v.schema.Context[contextName].Secrets[secretName] != "" && force == false {
+	if v.schema.Context[contextName].Secrets[secretName] != nil && force == false {
 		return fmt.Errorf("the secret %s does already exist. Use --force to overwrite", secretName)
 	}
 
-	v.schema.Context[contextName].Secrets[secretName] = secretEncodedValue
+	v.schema.Context[contextName].Secrets[secretName] = &SecretEntryTypes{
+		Encrypted: &SecretEntryEncrypted{
+			Value: secretEncodedValue,
+		},
+	}
+
+	return v.WriteConfig()
+
+}
+
+func (v *V1Writer) SetGcpSecret(contextName string, secretName string, resourceId string, force bool) error {
+
+	if v.schema.Context[contextName] == nil {
+		return fmt.Errorf("the context %s does not exist", contextName)
+	}
+
+	if v.schema.Context[contextName].Secrets == nil {
+		v.schema.Context[contextName].Secrets = make(map[string]*SecretEntryTypes)
+	}
+
+	if contextName != config_const.DefaultContextName && v.schema.Context[config_const.DefaultContextName].Secrets[secretName] == nil {
+		return fmt.Errorf("you need to define secret entry %s in the default context first", secretName)
+	}
+
+	if v.schema.Context[contextName].Secrets[secretName] != nil && force == false {
+		return fmt.Errorf("the secret %s does already exist. Use --force to overwrite", secretName)
+	}
+
+	v.schema.Context[contextName].Secrets[secretName] = &SecretEntryTypes{
+		Gcp: &SecretEntryGcp{
+			ResourceId: resourceId,
+		},
+	}
 
 	return v.WriteConfig()
 
@@ -77,7 +109,7 @@ func (v *V1Writer) AddContext(contextName string) error {
 	}
 
 	v.schema.Context[contextName] = &V1ContextAwareSecrets{
-		Secrets: make(map[string]string),
+		Secrets: make(map[string]*SecretEntryTypes),
 		Configs: make(map[string]string),
 	}
 
@@ -123,7 +155,7 @@ func (v *V1Writer) WriteConfig() error {
 
 	for contextName, context := range v.schema.Context {
 		if context.Secrets == nil && contextName == config_const.DefaultContextName {
-			context.Secrets = make(map[string]string)
+			context.Secrets = make(map[string]*SecretEntryTypes)
 		}
 	}
 

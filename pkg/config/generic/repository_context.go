@@ -4,15 +4,17 @@ import (
 	"encoding/base64"
 	"fmt"
 	config_const "github.com/benammann/git-secrets/pkg/config/const"
+	global_config "github.com/benammann/git-secrets/pkg/config/global"
 	"github.com/benammann/git-secrets/pkg/encryption"
 )
 
 type Context struct {
 	Name             string
+	GlobalConfig 	 *global_config.GlobalConfigProvider
 	SecretResolver   encryption.SecretResolver
-	Encryption       encryption.Engine
-	EncryptedSecrets map[string]string
-	Configs          map[string]string
+	Encryption encryption.Engine
+	Secrets    map[string]Secret
+	Configs    map[string]string
 }
 
 // AddContext adds a context and does some validations

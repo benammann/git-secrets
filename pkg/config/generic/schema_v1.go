@@ -11,7 +11,25 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 	"path/filepath"
 	"sort"
+	"strings"
 )
+
+type SecretEntry interface {
+	string | SecretEntryTypes
+}
+
+type SecretEntryTypes struct {
+	Encrypted *SecretEntryEncrypted `json:"encrypted,omitempty"`
+	Gcp *SecretEntryGcp `json:"gcp,omitempty"`
+}
+
+type SecretEntryEncrypted struct {
+	Value string `json:"value"`
+}
+
+type SecretEntryGcp struct {
+	ResourceId string `json:"resourceId"`
+}
 
 type V1Schema struct {
 	Schema      string                     `json:"$schema,omitempty"`
@@ -27,8 +45,37 @@ type V1DecryptSecret struct {
 
 type V1ContextAwareSecrets struct {
 	DecryptSecret *V1DecryptSecret  `json:"decryptSecret,omitempty"`
-	Secrets       map[string]string `json:"secrets,omitempty"`
+	Secrets       map[string]*SecretEntryTypes `json:"secrets,omitempty"`
 	Configs       map[string]string `json:"configs,omitempty"`
+}
+
+func (se *SecretEntryTypes) UnmarshalJSON(data []byte) error {
+	stringVal := string(data)
+	if !strings.Contains(stringVal, "{") {
+
+		var stringValOut string
+		if err := json.Unmarshal(data, &stringValOut); err != nil {
+			return err
+		}
+
+		se.Encrypted = &SecretEntryEncrypted{
+			Value: stringValOut,
+		}
+
+		return nil
+	}
+
+	type tmpSecretEntryTypes SecretEntryTypes
+	var res tmpSecretEntryTypes
+
+	if err := json.Unmarshal(data, &res); err != nil {
+		return err
+	}
+
+	se.Encrypted = res.Encrypted
+	se.Gcp = res.Gcp
+
+	return nil
 }
 
 type V1Context map[string]*V1ContextAwareSecrets
@@ -88,7 +135,7 @@ func (s *V1Schema) validateSchemaV1() error {
 
 		if contextValue.Secrets != nil {
 			for secretKey, _ := range contextValue.Secrets {
-				if defaultContext.Secrets[secretKey] == "" {
+				if defaultContext.Secrets[secretKey] == nil {
 					return fmt.Errorf("secret %s exists in context %s but not in default context", secretKey, contextKey)
 				}
 			}
@@ -144,11 +191,26 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string, globalConfig *global
 
 	// first, initialize all contexts
 	for contextKey, contextValue := range Parsed.Context {
+
 		localContext := &Context{
-			Name:             contextKey,
-			EncryptedSecrets: contextValue.Secrets,
-			Configs:          contextValue.Configs,
+			Name:    contextKey,
+			Secrets: nil,
+			Configs: contextValue.Configs,
+			GlobalConfig: globalConfig,
 		}
+
+		secretsOut := make(map[string]Secret)
+
+		for secretKey, encryptedSecret := range contextValue.Secrets {
+			if encryptedSecret.Encrypted != nil {
+				secretsOut[secretKey] = NewEncryptedSecret(secretKey, encryptedSecret.Encrypted.Value, localContext)
+			} else if encryptedSecret.Gcp != nil {
+				secretsOut[secretKey] = NewGcpSecret(secretKey, encryptedSecret.Gcp.ResourceId, localContext)
+			}
+		}
+
+		localContext.Secrets = secretsOut
+
 		// reference the default context
 		if localContext.Name == config_const.DefaultContextName {
 			defaultContext = localContext
@@ -184,17 +246,14 @@ func ParseSchemaV1(jsonInput []byte, configFileUsed string, globalConfig *global
 		}
 	}
 
-	var secrets []*Secret
+	var secrets []Secret
 
 	for _, context := range contexts {
-		for secretKey, encryptedSecret := range context.EncryptedSecrets {
-			secrets = append(secrets, &Secret{
-				Name:          secretKey,
-				OriginContext: context,
-				EncodedValue:  encryptedSecret,
-			})
+		for _, secret := range context.Secrets {
+			secrets = append(secrets, secret)
 		}
 	}
+
 
 	var configs []*Config
 	for _, context := range contexts {

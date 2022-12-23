@@ -2,12 +2,14 @@ package global_config
 
 import (
 	"fmt"
+	"github.com/AlecAivazis/survey/v2"
 	"regexp"
 	"sort"
 	"strings"
 )
 
 const SecretKeyPrefix = "secrets"
+const GcpCredentialsPrefix = "gcp.credentials"
 
 type GlobalConfigProvider struct {
 	storageProvider StorageProvider
@@ -21,6 +23,31 @@ func NewGlobalConfigProvider(storageProvider StorageProvider) *GlobalConfigProvi
 
 func (g *GlobalConfigProvider) GetSecret(secretKey string) (value string) {
 	return g.storageProvider.GetString(g.secretConfigKey(secretKey))
+}
+
+func (g *GlobalConfigProvider) GetGcpCredentialsFile(credentialsName string) string {
+	return g.storageProvider.GetString(g.gcpCredentialsKey(credentialsName))
+}
+
+func (g *GlobalConfigProvider) SelectGcpCredentialsFile() (string, error) {
+	availableKeys := g.GetGCPCredentialsKeys()
+	if len(availableKeys) < 1 {
+		return "", fmt.Errorf("you need to define at least one gcp credential first")
+	}
+
+	var res string
+	prompt := &survey.Select{
+		Message: "Which credentials to use:",
+		Options: availableKeys,
+	}
+
+	errAsk := survey.AskOne(prompt, &res)
+	if errAsk != nil {
+		return "", errAsk
+	}
+
+	return g.GetGcpCredentialsFile(res), nil
+
 }
 
 func (g *GlobalConfigProvider) SetSecret(secretKey string, secretValue string, force bool) error {
@@ -42,6 +69,22 @@ func (g *GlobalConfigProvider) SetSecret(secretKey string, secretValue string, f
 	return g.storageProvider.WriteConfig()
 }
 
+func (g *GlobalConfigProvider) SetGcpCredentials(credentialsName string, pathToFile string, force bool) error {
+
+
+	configKey := g.gcpCredentialsKey(credentialsName)
+
+	exists := g.GetGcpCredentialsFile(credentialsName) != ""
+	if exists && force == false {
+		return fmt.Errorf("gcp credentials %s already exists. use --force to overwrite", configKey)
+	}
+
+	g.storageProvider.Set(configKey, pathToFile)
+
+	return g.storageProvider.WriteConfig()
+
+}
+
 func (g *GlobalConfigProvider) GetSecretKeys() []string {
 	var secretKeys []string
 	for _, key := range g.storageProvider.AllKeys() {
@@ -54,8 +97,24 @@ func (g *GlobalConfigProvider) GetSecretKeys() []string {
 	return secretKeys
 }
 
+func (g *GlobalConfigProvider) GetGCPCredentialsKeys() []string {
+	var credentialsKeys []string
+	for _, key := range g.storageProvider.AllKeys() {
+		credentialsPrefix := fmt.Sprintf("%s.", GcpCredentialsPrefix)
+		if strings.HasPrefix(key, credentialsPrefix) {
+			credentialsKeys = append(credentialsKeys, strings.Replace(key, credentialsPrefix, "", 1))
+		}
+	}
+	sort.Strings(credentialsKeys)
+	return credentialsKeys
+}
+
 func (g *GlobalConfigProvider) secretConfigKey(secretKey string) string {
 	return fmt.Sprintf("%s.%s", SecretKeyPrefix, strings.ToLower(secretKey))
+}
+
+func (g *GlobalConfigProvider) gcpCredentialsKey(credentialsName string) string {
+	return fmt.Sprintf("%s.%s", GcpCredentialsPrefix, strings.ToLower(credentialsName))
 }
 
 func (g *GlobalConfigProvider) validateSecret(secretKey string, secretValue string) error {

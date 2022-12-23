@@ -81,7 +81,7 @@ git secrets render <targetName> --debug: Render and write the rendering target
 		for _, fileToRender := range filesToRender {
 
 			if isDryRun {
-				usedContext, fileContents, errRender := renderingEngine.RenderFile(fileToRender)
+				usedContext, fileContents, errRender := renderingEngine.RenderFile(cmd.Context(), fileToRender)
 				if isDebug {
 					fmt.Println(fileToRender.FileIn)
 					if usedContext != nil {
@@ -95,7 +95,7 @@ git secrets render <targetName> --debug: Render and write the rendering target
 				}
 				fmt.Println(fileContents)
 			} else {
-				usedContext, errWrite := renderingEngine.WriteFile(fileToRender)
+				usedContext, errWrite := renderingEngine.WriteFile(cmd.Context(), fileToRender)
 				if isDebug && usedContext != nil {
 					fmt.Println(fileToRender.FileIn)
 					renderContextJson, _ := json.MarshalIndent(usedContext, "", "  ")

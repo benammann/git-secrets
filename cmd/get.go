@@ -54,7 +54,7 @@ git secrets get secret <secretName> -c prod
 		if secretEntry == nil {
 			cobra.CheckErr(fmt.Errorf("the secret %s does not exist on context %s", secretKey, selectedContext.Name))
 		}
-		decodedValue, errDecode := secretEntry.Decode()
+		decodedValue, errDecode := secretEntry.GetPlainValue(cmd.Context())
 		if errDecode != nil {
 			cobra.CheckErr(fmt.Errorf("could not decode secret %s: %s", secretKey, errDecode.Error()))
 		}
